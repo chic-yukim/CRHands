@@ -1,0 +1,10 @@
+{
+    "information":
+    {
+        "category" : "application",
+        "name": "Project : Physics",
+        "author": "YongHo Lee <jason0720@chic.re.kr>",
+        "version": "0.1",
+        "description": "This is Bullet physics engine test bed."
+    }
+}
