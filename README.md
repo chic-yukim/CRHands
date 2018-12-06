@@ -45,6 +45,12 @@
 	3-1. 기본 설정은 VR 모드 (``render-pipeline-vr``)
     
 	3-2. 원하는 디스플레이 방식에 맞게 폴더의 파일들을 'config/panda3d/render-pipeline' 폴더에 전체 복사
+    
+## CHIC_HAND_MOCAP 설정
+
+* ``DynamicModuleConfiguration.xml`` 파일을 실험하는 기기에 맞게 수정
+* ``handmocap.interface`` 태그의 ``mode`` / ``port`` / ``mech`` 수정
+* ``CRHands.tracker_serial`` 태그의 ``VIVE 트래커 시리얼 넘버`` 수정
 
 ## 프로젝트 실행
 `CRHands` 프로젝트를 시작 프로젝트로 설정하고 실행
