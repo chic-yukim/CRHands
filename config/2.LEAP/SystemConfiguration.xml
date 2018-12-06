@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<system>
+    <logging>
+        <level>debug</level>
+    </logging>
+
+    <systemindex>1</systemindex>
+
+    <dynamic_modules>
+		<module>
+			<id>crprofiler</id>
+		</module>
+
+		<module>
+            <id>leapmotion</id>
+        </module>
+
+		
+		<!--
+		<module>
+            <id>kinesthetic_hand_mocap</id>
+        </module>
+		
+		<module>
+            <id>hand_mocap</id>	
+        </module>
+		-->
+		
+		<module>
+            <id>openvr</id>
+        </module>
+		
+        <application>
+            <id>CRHands</id>
+        </application>
+    </dynamic_modules>
+</system>

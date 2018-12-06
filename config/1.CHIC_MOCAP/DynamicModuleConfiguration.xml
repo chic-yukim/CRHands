@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modules>
+	<leapmotion>
+        <interface>
+            <input>LeapMotion</input>
+            <output>Hands</output>
+        </interface>
+    </leapmotion>
+	<hand_mocap>
+        <interface>
+            <input>Hand_MoCAP</input>
+            <output>MoCAPHands</output>
+			<mode>right</mode>
+			<port_left>COM7</port_left>
+			<port_right>COM2</port_right>
+			<mech_left>11</mech_left>
+			<mech_right>16</mech_right>
+        </interface>	
+    </hand_mocap>
+	<kinesthetic_hand_mocap>
+		<interface>
+			<input>KinestheticHandMoCAP</input>
+            <output>KinestheticMoCAPHands</output>
+			<port>COM4</port>
+			<version>new</version>
+		</interface>
+	</kinesthetic_hand_mocap>
+    <CRHands>
+        <subsystem>
+			<leap>false</leap>
+			<handmocap>true</handmocap>
+			<handmocap_position>false</handmocap_position>
+			<handmocap_scale>true</handmocap_scale>
+			<unistmocap>false</unistmocap>
+        </subsystem>
+		<tracker_serial>
+			<!-- 8 mech : LHR-15BB62C0 -->
+			<!-- 10 mech : LHR-05BDE1E1 -->
+			<!-- 16 mech : LHR-1CB6E37A -->
+			<!-- 9 mech : LHR-15B8A5E8 -->
+			<l_wrist>LHR-05BDE1E1</l_wrist>
+			<r_wrist>LHR-1CB6E37A</r_wrist>
+        </tracker_serial>
+		<object>
+			<create>
+				<ground>true</ground>
+				<table>true</table>
+				<cubes>true</cubes>
+			</create>
+			<table>
+				<is_compound>false</is_compound>
+				<init_position_x>0.0</init_position_x>
+				<init_position_y>0.0</init_position_y>
+				<init_position_z>0.0</init_position_z>
+				<scale>1.0</scale>
+				<table_phyx>
+					<phyxInit_position_x>0.0</phyxInit_position_x>
+					<phyxInit_position_y>0.0</phyxInit_position_y>
+					<phyxInit_position_z>0.725</phyxInit_position_z>
+					<phyxHalfExtent_x>0.695</phyxHalfExtent_x>
+					<phyxHalfExtent_y>0.38</phyxHalfExtent_y>
+					<phyxHalfExtent_z>0.015</phyxHalfExtent_z>
+				</table_phyx>
+			</table>
+			<cubes>
+				<init_position_x>-0.4</init_position_x>
+				<init_position_y>0.0</init_position_y>
+				<init_position_z>0.87</init_position_z>
+				<halfExtent>0.025</halfExtent>
+				<count>60</count>
+			</cubes>
+		</object>
+		<handprop>
+            <m_vec3fZeroToSensor_x>0.0</m_vec3fZeroToSensor_x>
+            <m_vec3fZeroToSensor_y>0.09</m_vec3fZeroToSensor_y>
+			<m_vec3fZeroToSensor_z>-0.01</m_vec3fZeroToSensor_z>
+        </handprop>
+    </CRHands>
+</modules>
