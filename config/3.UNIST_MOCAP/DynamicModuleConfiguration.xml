@@ -10,7 +10,7 @@
         <interface>
             <input>Hand_MoCAP</input>
             <output>MoCAPHands</output>
-			<mode>right</mode>
+			<mode>left</mode>
 			<port_left>COM7</port_left>
 			<port_right>COM2</port_right>
 			<mech_left>11</mech_left>
