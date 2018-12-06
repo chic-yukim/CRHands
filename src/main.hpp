@@ -38,9 +38,6 @@ public:
 	void reset_cubes_position();
 
 private:
-	friend class MainGUI;
-	std::unique_ptr<MainGUI> main_gui_;
-
 	crsf::TGraphicRenderEngine* rendering_engine_;
 	rpcore::RenderPipeline* pipeline_;
 

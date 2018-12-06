@@ -3,7 +3,6 @@
 #include <spdlog/spdlog.h>
 
 #include "hand/hand_manager.hpp"
-#include "main_gui/main_gui.hpp"
 
 #include <crsf/CREngine/TDynamicModuleManager.h>
 
@@ -51,8 +50,6 @@ void CRHands::OnStart(void)
 	setup_hand();
 	setup_scene();
 
-	main_gui_ = std::make_unique<MainGUI>(*this);
-
 	do_method_later(1.0f, [this](rppanda::FunctionalTask* task) {
 		physics_manager_->Start();
 		return AsyncTask::DoneStatus::DS_done;
@@ -62,8 +59,6 @@ void CRHands::OnStart(void)
 void CRHands::OnExit(void)
 {
 	remove_all_tasks();
-
-	main_gui_.reset();
 
 	physics_manager_->Exit();
 

@@ -28,16 +28,6 @@ set(source_object
 	"${PROJECT_SOURCE_DIR}/src/object/soma_cube.cpp"
 )
 
-set(source_main_gui_imgui
-    "${PROJECT_SOURCE_DIR}/src/main_gui/imgui/imgui_stl.cpp"
-    "${PROJECT_SOURCE_DIR}/src/main_gui/imgui/imgui_stl.h"
-)
-
-set(source_main_gui
-    "${PROJECT_SOURCE_DIR}/src/main_gui/main_gui.cpp"
-    "${PROJECT_SOURCE_DIR}/src/main_gui/main_gui.hpp"
-)
-
 set(source_util
 	"${PROJECT_SOURCE_DIR}/src/util/math.hpp"
 	"${PROJECT_SOURCE_DIR}/src/util/math.cpp"
@@ -47,15 +37,11 @@ set(source_util
 source_group("src" FILES ${source_src})
 source_group("src\\hand" FILES ${source_hand})
 source_group("src\\object" FILES ${source_object})
-source_group("src\\main_gui\\imgui" FILES ${source_main_gui_imgui})
-source_group("src\\main_gui" FILES ${source_main_gui})
 source_group("src\\util" FILES ${source_util})
 
 set(module_sources
     ${source_src}
 	${source_hand}
 	${source_object}
-	${source_main_gui_imgui}
-	${source_main_gui}
 	${source_util}
 )
