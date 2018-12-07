@@ -54,3 +54,40 @@
 
 ## 프로젝트 실행
 `CRHands` 프로젝트를 시작 프로젝트로 설정하고 실행
+
+## 프로젝트 실행 이슈
+
+* SteamVR 업데이트로 인해 트래커 설정 별도 조절 필요
+	
+	1. Steam VR app에서 연결된 트래커 아이콘을 우클릭
+
+	2. Manage Vive Trackers
+
+	3. Select Role 에서 Disabled로 설정
+
+## CHIC_HAND_MOCAP 기능
+
+* 1번 키를 이용하여 Calibration을 수행 (모든 손가락을 일자로 쫙 핀 상태에서 수행)
+* Vibration actuator 작동법
+
+	* 함수 원형 : ``interface_hand_mocap_->MakeVibration(int side, const unsigned char data[])``
+	* ---
+	* side : left = 0 / right = 1
+	* ---
+	* data : char data[8] = { 0x40, 0x01, 0x05, ``0x07``, ``0x05``, ``0x05``, ``0x4B``, ``0xA5`` };
+	* ---
+	* data[0] / data[1] / data[2] 는 고정
+	* data[3] 이 엄지/검지/중지 각 Vibration actuator를 On/Off 시키는 명령어이며, 3자리 이진수 조합
+	* 예를들어, 엄지만 진동을 주려면 = 100(이진수) = 0x04(16진수) / 엄지/검지만 진동을 주려면 = 110(이진수) = 0x06(16진수)
+	* ---
+	* data[4] / data[5] / data[6] 은 엄지/검지/중지 각 Vibration actuator의 duty cycle
+	* duty cycle를 조절하면 실제로 진동의 세기 변화는 미미하고 진동의 떨림(소리)가 커짐 (인지 가용 범위 : 5 ~ 75(십진수))
+	* ---
+	* data[7] 은 Vibration actuator의 frequency
+	* frequency를 조절해야 실제 진동 세기가 변함 (인지 가용 범위: 110 ~200(십진수))
+	* ---
+	* Vibration stop 함수 : ``interface_hand_mocap_->StopVibration(int side)``
+
+## 기타 기능
+
+* 9번 키를 이용하여 큐브의 위치를 초기 위치로 재설정
