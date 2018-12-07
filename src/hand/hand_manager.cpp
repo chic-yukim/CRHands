@@ -102,14 +102,6 @@ void HandManager::setup_hand_event(void)
 {
 	// calibration
 	accept("1", [this](const Event*) {
-		if (props_.get("subsystem.leap", false))
-		{
-			hand_->InitScalingParameter();
-
-			bool is_full_counting_joint_ = false;
-			int  number_full_counting_joint_ = 0;
-		}
-
 		if (interface_hand_mocap_)
 		{
 			hand_->InitScalingParameter();
