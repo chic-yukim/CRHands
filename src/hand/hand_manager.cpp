@@ -184,8 +184,8 @@ void HandManager::setup_hand(void)
 
     // create physics interactor
     hand_->Set3DModel_StandardPose();
-    hand_->ConstructPhysicsInteractor_FullVertex_Sphere(particle_radius_, 0.02, false, false, "right");
-	//hand_->ConstructPhysicsInteractor_FixedVertex_Sphere("resources/models/hands/PhysicsInteractorIndex_full_new_right.txt", particle_radius_, false, false, 0, "right");
+    hand_->ConstructPhysicsInteractor_FullVertex_Sphere(particle_radius_, 0.02, false, false, "left");
+	//hand_->ConstructPhysicsInteractor_FixedVertex_Sphere("resources/models/hands/PhysicsInteractorIndex_full_new_left.txt", particle_radius_, false, false, 0, "left");
 
 
 
