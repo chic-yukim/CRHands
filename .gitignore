@@ -1,5 +1,7 @@
 /build
 /x64
+/crsf
+/config
 resources/models/right_index0.egg
 resources/models/right_index1.egg
 resources/models/right_index2.egg
