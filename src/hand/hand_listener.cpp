@@ -106,8 +106,8 @@ bool HandManager::object_update_event(const std::shared_ptr<crsf::TCRModel>& my_
 		// stop vibration feedback
 		if (interface_hand_mocap_)
 		{
-			interface_hand_mocap_->StopVibration(0);
-			interface_hand_mocap_->StopVibration(1);
+			interface_hand_mocap_->SetVibration(Hand_MoCAPInterface::HAND_LEFT, Hand_MoCAPInterface::FingerMask::FINGER_NONE);
+			interface_hand_mocap_->SetVibration(Hand_MoCAPInterface::HAND_RIGHT, Hand_MoCAPInterface::FingerMask::FINGER_NONE);
 		}
 
 		return false;
@@ -134,11 +134,8 @@ bool HandManager::object_update_event(const std::shared_ptr<crsf::TCRModel>& my_
 			}
 		}
 
-		std::vector<unsigned char> left_data = { 0x40, 0x01, 0x05, (unsigned char)left_bit, 0x05, 0x05, 0x4B, 0xA5 };
-		std::vector<unsigned char> right_data = { 0x40, 0x01, 0x05, (unsigned char)right_bit, 0x05, 0x05, 0x4B, 0xA5 };
-
-		interface_hand_mocap_->MakeVibration(0, left_data.data());
-		interface_hand_mocap_->MakeVibration(1, right_data.data());
+        interface_hand_mocap_->SetVibration(Hand_MoCAPInterface::HAND_LEFT, static_cast<Hand_MoCAPInterface::FingerMask>(left_bit));
+        interface_hand_mocap_->SetVibration(Hand_MoCAPInterface::HAND_RIGHT, static_cast<Hand_MoCAPInterface::FingerMask>(right_bit));
 	}
 
 	return false;

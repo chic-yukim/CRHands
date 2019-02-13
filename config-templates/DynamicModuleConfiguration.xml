@@ -10,12 +10,13 @@
         <interface>
             <input>Hand_MoCAP</input>
             <output>MoCAPHands</output>
+			<commode>ble</commode>
 			<mode>left</mode>
 			<port_left>COM7</port_left>
 			<port_right>COM2</port_right>
-			<mech_left>11</mech_left>
+			<mech_left>2</mech_left>
 			<mech_right>16</mech_right>
-        </interface>	
+        </interface>
     </hand_mocap>
 	<kinesthetic_hand_mocap>
 		<interface>
@@ -38,7 +39,7 @@
 			<!-- 10 mech : LHR-05BDE1E1 -->
 			<!-- 16 mech : LHR-1CB6E37A -->
 			<!-- 9 mech : LHR-15B8A5E8 -->
-			<l_wrist>LHR-05BDE1E1</l_wrist>
+			<l_wrist>LHR-505CED72</l_wrist>
 			<r_wrist>LHR-1CB6E37A</r_wrist>
         </tracker_serial>
 		<object>
