@@ -54,9 +54,9 @@ void CRHands::setup_cubes()
 		physics_manager_->AddModel(cube);
 
 		// add listener
-		physics_model->AttachCollisionListener(boost::bind(&HandManager::object_collision_event, hand_manager_.get(), _1, _2), "soma_cube_collision_" + std::to_string(i));
-		physics_model->AttachSeparationListener(boost::bind(&HandManager::object_separation_event, hand_manager_.get(), _1, _2), "soma_cube_separation_" + std::to_string(i));
-		physics_model->AttachUpdateListener(boost::bind(&HandManager::object_update_event, hand_manager_.get(), _1), "soma_cube_update_" + std::to_string(i));
+		physics_model->AttachCollisionListener(std::bind(&HandManager::object_collision_event, hand_manager_.get(), std::placeholders::_1, std::placeholders::_2), "soma_cube_collision_" + std::to_string(i));
+		physics_model->AttachSeparationListener(std::bind(&HandManager::object_separation_event, hand_manager_.get(), std::placeholders::_1, std::placeholders::_2), "soma_cube_separation_" + std::to_string(i));
+		physics_model->AttachUpdateListener(std::bind(&HandManager::object_update_event, hand_manager_.get(), std::placeholders::_1), "soma_cube_update_" + std::to_string(i));
 
 		//
 		cubes_.push_back(cube);
