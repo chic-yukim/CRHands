@@ -13,9 +13,9 @@
 
 ## 프로젝트 설정
 1. CRSF SDK를 다운로드
-2. CRSF SDK 폴더 설정: 두 방법 중 하나 사용
+2. CRSF SDK 폴더 설정: **두 방법 중 하나 사용**
    1. CRSF SDK 를 "crsf" 이름으로 압축 해제
-   2. CRSF SDK를 프로젝트 디렉토리로 링크
+   2. CRSF SDK 를 프로젝트 디렉토리로 링크
       - 프로젝트 디렉토리에서 cmd 창 실행
       - `mklink /J crsf CRSF_SDK_폴더` 입력
       - 프로젝트 디렉토리에 생성된 'crsf' 폴더와 CRSF SDK 폴더 간의 교차점이 생성되었는지 확인
@@ -67,7 +67,7 @@
 
 * 1번 키를 이용하여 Calibration을 수행 (모든 손가락을 일자로 쫙 핀 상태에서 수행)
 * Vibration actuator 작동법
-  ```
+  ```cpp
   interface_hand_mocap_->SetVibration(Hand_MoCAPInterface::HAND_LEFT, Hand_MoCAPInterface::FingerMask::FINGER_MIDDLE);
   ```
 
