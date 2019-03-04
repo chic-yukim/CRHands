@@ -14,11 +14,6 @@
 
 MainGUI::MainGUI(CRHands& app) : app_(app)
 {
-    std::time_t t = std::time(nullptr);
-    std::stringstream ss;
-    ss << std::put_time(std::localtime(&t), "%F");
-    today_date_ = ss.str();
-
     rppanda::Messenger::get_global_instance()->send(
         "imgui-setup-context",
         EventParameter(new rppanda::FunctionalTask([this](rppanda::FunctionalTask* task) {
@@ -27,15 +22,19 @@ MainGUI::MainGUI(CRHands& app) : app_(app)
             return AsyncTask::DS_done;
         }, "MainApp::setup-imgui"))
     );
+
+    setup_hand_mocap();
 }
 
 MainGUI::~MainGUI() = default;
 
 void MainGUI::on_imgui_new_frame()
 {
-	static bool window = true;
+    static bool window = true;
 
-	ImGui::Begin("CRHands", &window);
+    ImGui::Begin("CRHands", &window);
+
+    ui_hand_mocap();
 
     ImGui::End();
 }

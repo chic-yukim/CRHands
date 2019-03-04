@@ -24,6 +24,9 @@ set(CRMODULE_INSTALL_DIR "${CRMODULE_ID}")
 # === project specific packages ===
 include(FindPackages)
 
+find_package(imgui CONFIG REQUIRED)
+set_target_properties(imgui::imgui PROPERTIES MAP_IMPORTED_CONFIG_RELWITHDEBINFO RELEASE)
+
 CRSeedLib_FIND_MODULES("hand_mocap")
 
 # ==================================================================================================
@@ -60,7 +63,8 @@ target_link_libraries(${PROJECT_NAME}
     CRSeedLib
 	Boost::thread
 	fmt::fmt-header-only spdlog::spdlog
-	
+    imgui::imgui
+
 	crmodule::hand_mocap
 	crmodule::kinesthetic_hand_mocap
 	crmodule::openvr

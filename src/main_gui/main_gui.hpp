@@ -11,10 +11,13 @@ public:
 
     virtual ~MainGUI();
 
+    void setup_hand_mocap();
+    void ui_hand_mocap();
+
 private:
     void on_imgui_new_frame();
 
-	CRHands& app_;
+    CRHands& app_;
 
-    std::string today_date_;
+    int hand_mocap_status_[2];
 };

@@ -33,6 +33,7 @@ enabled:
     - sky_ao
     - openvr
     - env_probes
+    - imgui
 
 overrides:
     ao:
