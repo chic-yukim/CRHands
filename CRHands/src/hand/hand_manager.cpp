@@ -106,8 +106,8 @@ void HandManager::setup_hand_event(void)
 		{
 			hand_->InitScalingParameter();
 
-			interface_hand_mocap_->FingerInit(0);
-			interface_hand_mocap_->FingerInit(1);
+			interface_hand_mocap_->FingerInit(Hand_MoCAPInterface::HAND_LEFT);
+			interface_hand_mocap_->FingerInit(Hand_MoCAPInterface::HAND_RIGHT);
 
 			is_hand_mocap_calibration_ = true;
 		}

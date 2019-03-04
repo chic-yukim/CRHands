@@ -19,5 +19,12 @@ private:
 
     CRHands& app_;
 
-    int hand_mocap_status_[2];
+    struct HandMocapStatus
+    {
+        int status = 0;
+        bool thumb = false;
+        bool index = false;
+        bool middle = false;
+    };
+    HandMocapStatus hand_mocap_status_[2];
 };
