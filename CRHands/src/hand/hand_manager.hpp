@@ -109,6 +109,8 @@ private:
 
 	// physics particle
 	float particle_radius_ = 0.0025f;
+
+    unsigned int last_hand_mocap_vibrations_[2];
 };
 
 inline crsf::TCRHand* HandManager::get_hand() const

@@ -59,84 +59,56 @@ bool HandManager::object_separation_event(const std::shared_ptr<crsf::TCRModel>&
 
 bool HandManager::object_update_event(const std::shared_ptr<crsf::TCRModel>& my_model)
 {
-	auto world = crsf::TGraphicRenderEngine::GetInstance()->GetWorld();
+    auto my_model_contact_info = my_model->GetPhysicsModel()->GetContactInfo();
+    const auto& contacted_models = my_model_contact_info->GetContactedModel();
 
-	auto my_model_contact_info = my_model->GetPhysicsModel()->GetContactInfo();
-	auto contacted_models = my_model_contact_info->GetContactedModel();
+    Hand_MoCAPInterface::FingerMask vibration_mask[2] = { Hand_MoCAPInterface::FingerMask::FINGER_NONE, Hand_MoCAPInterface::FingerMask::FINGER_NONE };
 
-	std::vector<std::shared_ptr<crsf::TCRModel>> pContacted;
-	bool is_contacted[6] = { 0 }; // 6 vibration bit - left 3 + right 3
-	for (auto& contacted_model : contacted_models)
-	{
-		if (contacted_model->GetModelGroup() == crsf::EMODEL_GROUP_HANDPHYSICSINTERACTOR)
-		{
-			pContacted.push_back(contacted_model);
-			auto intr = hand_->FindPhysicsInteractor(contacted_model);
-			if (!intr)
-				return false;
-			auto tag = intr->GetConnectedJointTag();
+    for (const auto& contacted_model : contacted_models)
+    {
+        if (contacted_model->GetModelGroup() == crsf::EMODEL_GROUP_HANDPHYSICSINTERACTOR)
+        {
+            auto intr = hand_->FindPhysicsInteractor(contacted_model);
+            if (!intr)
+                return false;
+            auto tag = intr->GetConnectedJointTag();
 
-			// vibration bit masking
-			switch (tag)
-			{
-			case crsf::LEFT__MIDDLE_4:
-				is_contacted[0] = true;
-				break;
-			case crsf::LEFT__INDEX_4:
-				is_contacted[1] = true;
-				break;
-			case crsf::LEFT__THUMB_4:
-				is_contacted[2] = true;
-				break;
-			case crsf::RIGHT__MIDDLE_4:
-				is_contacted[3] = true;
-				break;
-			case crsf::RIGHT__INDEX_4:
-				is_contacted[4] = true;
-				break;
-			case crsf::RIGHT__THUMB_4:
-				is_contacted[5] = true;
-				break;
-			}
-		}
-	}
+            // vibration bit masking
+            switch (tag)
+            {
+            case crsf::LEFT__MIDDLE_4:
+                vibration_mask[Hand_MoCAPInterface::HAND_LEFT] |= Hand_MoCAPInterface::FingerMask::FINGER_MIDDLE;
+                break;
+            case crsf::LEFT__INDEX_4:
+                vibration_mask[Hand_MoCAPInterface::HAND_LEFT] |= Hand_MoCAPInterface::FingerMask::FINGER_INDEX;
+                break;
+            case crsf::LEFT__THUMB_4:
+                vibration_mask[Hand_MoCAPInterface::HAND_LEFT] |= Hand_MoCAPInterface::FingerMask::FINGER_THUMB;
+                break;
+            case crsf::RIGHT__MIDDLE_4:
+                vibration_mask[Hand_MoCAPInterface::HAND_RIGHT] |= Hand_MoCAPInterface::FingerMask::FINGER_MIDDLE;
+                break;
+            case crsf::RIGHT__INDEX_4:
+                vibration_mask[Hand_MoCAPInterface::HAND_RIGHT] |= Hand_MoCAPInterface::FingerMask::FINGER_INDEX;
+                break;
+            case crsf::RIGHT__THUMB_4:
+                vibration_mask[Hand_MoCAPInterface::HAND_RIGHT] |= Hand_MoCAPInterface::FingerMask::FINGER_THUMB;
+                break;
+            }
+        }
+    }
 
-	if (pContacted.empty())
-	{
-		// stop vibration feedback
-		if (interface_hand_mocap_)
-		{
-			interface_hand_mocap_->SetVibration(Hand_MoCAPInterface::HAND_LEFT, Hand_MoCAPInterface::FingerMask::FINGER_NONE);
-			interface_hand_mocap_->SetVibration(Hand_MoCAPInterface::HAND_RIGHT, Hand_MoCAPInterface::FingerMask::FINGER_NONE);
-		}
+    if (interface_hand_mocap_)
+    {
+        for (auto hand_index : { Hand_MoCAPInterface::HAND_LEFT, Hand_MoCAPInterface::HAND_RIGHT })
+        {
+            if (vibration_mask[hand_index] != last_hand_mocap_vibrations_[hand_index])
+            {
+                interface_hand_mocap_->SetVibration(hand_index, vibration_mask[hand_index]);
+                last_hand_mocap_vibrations_[hand_index] = vibration_mask[hand_index];
+            }
+        }
+    }
 
-		return false;
-	}
-
-	// do vibration feedback
-	if (interface_hand_mocap_)
-	{
-		unsigned int left_bit = 0;
-		unsigned int right_bit = 0;
-
-		for (int i = 0; i < 2; i++)
-		{
-			for (int j = 0; j < 3; j++)
-			{
-				if (i == 0)
-				{
-					left_bit += (is_contacted[i * 3 + j] ? 1 : 0) * pow(2, j);
-				}
-				else
-				{
-					right_bit += (is_contacted[i * 3 + j] ? 1 : 0) * pow(2, j);
-				}
-			}
-		}
-
-        interface_hand_mocap_->SetVibration(Hand_MoCAPInterface::HAND_LEFT, static_cast<Hand_MoCAPInterface::FingerMask>(left_bit));
-        interface_hand_mocap_->SetVibration(Hand_MoCAPInterface::HAND_RIGHT, static_cast<Hand_MoCAPInterface::FingerMask>(right_bit));
-	}
-
-	return false;
+    return false;
 }
