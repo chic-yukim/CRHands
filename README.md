@@ -4,10 +4,11 @@
 ```
 ─ project
   ├ (crsf)                  # CRSF SDK
-  ├ (config)                # Configuraion files
-  ├ config-templates        
-  ├ resources
-  ├ src    
+  ├ CRHands
+  |  ├ config               # Configuraion files
+  |  ├ resources
+  |  ├ src
+  |  └ CMakeLists.txt       # CMake file
   └ CMakeLists.txt          # CMake file
 ```
 
@@ -23,25 +24,17 @@
 
 ## 설정 파일
 
-1. 설정 파일들을 프로젝트 디렉토리로 링크
+1. 'config' 폴더에는 각 장치에 맞는 설정 파일별 폴더들이 존재 (`CHIC_MOCAP` / `LEAP` / `UNIST_MOCAP`)
 
-	a. 프로젝트 디렉토리에서 cmd 창 실행
+	1-1. 기본 설정은 `CHIC_MOCAP`
 
-    b. `mklink /J config config-templates` 입력
+	1-2. 각 장치에 맞게 `.xml` 파일들을 복사하여 사용
 
-    c. 프로젝트 디렉토리에 생성된 'config' 폴더와 'config-templates' 폴더 간의 교차점이 생성되었는지 확인
+2. 'config/panda3d' 폴더에는 디스플레이 방식별 폴더들이 존재 (`render-pipeline-mono` / `render-pipeline-vr`)
 
-2. 'config' 폴더에는 각 장치에 맞는 설정 파일별 폴더들이 존재 (`CHIC_MOCAP` / `LEAP` / `UNIST_MOCAP`)
+	2-1. 기본 설정은 VR 모드 (`render-pipeline-vr`)
 
-	2-1. 기본 설정은 `CHIC_MOCAP`
-
-	2-2. 각 장치에 맞게 `.xml` 파일들을 복사하여 사용
-
-3. 'config/panda3d' 폴더에는 디스플레이 방식별 폴더들이 존재 (`render-pipeline-mono` / `render-pipeline-vr`)
-
-	3-1. 기본 설정은 VR 모드 (`render-pipeline-vr`)
-
-	3-2. 원하는 디스플레이 방식에 맞게 폴더의 파일들을 'config/panda3d/render-pipeline' 폴더에 전체 복사
+	2-2. 원하는 디스플레이 방식에 맞게 폴더의 파일들을 'config/panda3d/render-pipeline' 폴더에 전체 복사
 
 ## CHIC_HAND_MOCAP 설정
 
