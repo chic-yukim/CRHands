@@ -46,6 +46,11 @@ void MainGUI::ui_hand_mocap()
 
         ImGui::LabelText("Status", hand_mocap_interface->GetStatusString(Hand_MoCAPInterface::Status(hand_mocap_status_[hand_index].status)));
 
+        if (ImGui::Button("Calibration"))
+        {
+            hand_mocap_interface->FingerInit(hand_index);
+        }
+
         ImGui::TextUnformatted("Vibration:");
         ImGui::BeginGroup();
 
