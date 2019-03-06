@@ -61,7 +61,7 @@ global_stage_order:
 
   # Finishing stages, do not insert anything below
   - DepthmapRenderStage
-  - VSTCompositeStage
+  - ARCompositeStage
   - OpenVRRenderStage
   - UpscaleStage
   - FinalStage

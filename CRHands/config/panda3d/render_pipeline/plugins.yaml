@@ -31,9 +31,10 @@ enabled:
     - pssm
     - scattering
     - sky_ao
-    - openvr
+    #- openvr
     - env_probes
     - imgui
+    - rpstat
 
 overrides:
     ao:

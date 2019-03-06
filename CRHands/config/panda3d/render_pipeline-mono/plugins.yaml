@@ -22,7 +22,6 @@
 #    # - fxaa
 #    # - volumetrics
 #    # - vxgi
-#    - crsf
 
 # stereo plugins
 enabled:
@@ -34,6 +33,8 @@ enabled:
     - sky_ao
     #- openvr
     - env_probes
+    - imgui
+    - rpstat
 
 overrides:
     ao:
@@ -211,4 +212,6 @@ overrides:
 
     openvr:
         openvr_sdk_path: /$$crsf/thirdparty/openvr
+        supersample_mode: force
+        supersample_scale: 1.0
         load_render_model: false
