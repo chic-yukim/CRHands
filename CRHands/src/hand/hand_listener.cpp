@@ -233,7 +233,7 @@ bool HandManager::object_update_event(const std::shared_ptr<crsf::TCRModel>& my_
 	// set object transform to grasp state
 	if (my_physics_model->GetIsGrasped())
 	{
-		my_physics_model->SetPhysicsType(crsf::EPHYX_TYPE_RIGIDBODY_PASSIVE);
+		//my_physics_model->SetPhysicsType(crsf::EPHYX_TYPE_RIGIDBODY_PASSIVE);
 
 		LMatrix4f fixed_pose = my_model->GetFixedRelativeTransform();
 

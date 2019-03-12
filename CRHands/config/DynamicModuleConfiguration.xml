@@ -28,8 +28,8 @@
 	</kinesthetic_hand_mocap>
     <CRHands>
         <subsystem>
-			<leap>false</leap>
-			<handmocap>true</handmocap>
+			<leap>true</leap>
+			<handmocap>false</handmocap>
 			<handmocap_position>false</handmocap_position>
 			<handmocap_scale>true</handmocap_scale>
 			<unistmocap>false</unistmocap>
