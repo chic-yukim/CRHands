@@ -56,6 +56,8 @@ public:
 	void get_open_vr_module_data();
 
 	// listener
+	bool interactor_collision_event(const std::shared_ptr<crsf::TCRModel>& my_model, const std::shared_ptr<crsf::TCRModel>& evented_model);
+
 	bool object_collision_event(const std::shared_ptr<crsf::TCRModel>& my_model, const std::shared_ptr<crsf::TCRModel>& evented_model);
 	bool object_separation_event(const std::shared_ptr<crsf::TCRModel>& my_model, const std::shared_ptr<crsf::TCRModel>& evented_model);
 	bool object_update_event(const std::shared_ptr<crsf::TCRModel>& my_model);
@@ -72,7 +74,6 @@ private:
 	crsf::TWorldObject* hand_object_ = nullptr;
 	crsf::TCharacter* hand_character_ = nullptr;
 
-
 	// CHIC mocap
 	Hand_MoCAPInterface* interface_hand_mocap_ = nullptr;
 
@@ -86,10 +87,15 @@ private:
 	};
 	e_hand_mocap_mode_ hand_mocap_mode_;
 
+	unsigned int last_hand_mocap_vibrations_[2];
+
 	// UNIST mocap
 	Kinesthetic_HandMoCAPInterface* interface_unist_mocap_ = nullptr;
+	int unist_mocap_joint_number_ = 28;
 
 	float hand_mocap_data_[28];
+
+	std::string unist_mocap_mode_ = "right";
 
 	// VIVE
 	std::shared_ptr<OpenVRModule> module_open_vr_ = nullptr;
@@ -109,8 +115,6 @@ private:
 
 	// physics particle
 	float particle_radius_ = 0.0025f;
-
-    unsigned int last_hand_mocap_vibrations_[2];
 };
 
 inline crsf::TCRHand* HandManager::get_hand() const

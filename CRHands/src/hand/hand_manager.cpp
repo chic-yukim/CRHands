@@ -65,7 +65,7 @@ void HandManager::get_open_vr_module_data()
 		return;
 	module_open_vr_ = std::dynamic_pointer_cast<OpenVRModule>(m);
 
-	if (props_.get("subsystem.handmocap", false) || props_.get("subsystem.unistmocap", false))
+	if (props_.get("subsystem.handmocap", false))
 	{
 		// Set tracker serial number
 		left_wrist_tracker_serial_ = props_.get("tracker_serial.l_wrist", std::string(""));
@@ -89,6 +89,41 @@ void HandManager::get_open_vr_module_data()
 				}
 				if (serial_number == right_wrist_tracker_serial_
 					&& (hand_mocap_mode_ == BOTH || hand_mocap_mode_ == RIGHT))
+				{
+					tracker_index_right_ = k;
+					tracker_count++;
+				}
+
+				if (tracker_count >= 2)
+					break;
+			}
+		}
+	}
+
+	if (props_.get("subsystem.unistmocap", false))
+	{
+		// Set tracker serial number
+		left_wrist_tracker_serial_ = props_.get("tracker_serial.l_wrist", std::string(""));
+		right_wrist_tracker_serial_ = props_.get("tracker_serial.r_wrist", std::string(""));
+
+		// Find tracker
+		int tracker_count = 0;
+
+		for (int k = 0, k_end = module_open_vr_->GetMaximumDeviceCount(); k < k_end; ++k)
+		{
+			if (module_open_vr_->GetOpenVRPlugin()->is_tracked_device_connected(k))
+			{
+				std::string serial_number;
+				module_open_vr_->GetOpenVRPlugin()->get_tracked_device_property(serial_number, k, vr::Prop_SerialNumber_String);
+
+				if (serial_number == left_wrist_tracker_serial_
+					&& unist_mocap_mode_ == "left")
+				{
+					tracker_index_left_ = k;
+					tracker_count++;
+				}
+				if (serial_number == right_wrist_tracker_serial_
+					&& unist_mocap_mode_ == "right")
 				{
 					tracker_index_right_ = k;
 					tracker_count++;
@@ -179,8 +214,14 @@ void HandManager::setup_hand(void)
 
     // create physics interactor
     hand_->Set3DModel_StandardPose();
-    hand_->ConstructPhysicsInteractor_FullVertex_Sphere(particle_radius_, 0.02, false, false, "left");
-	//hand_->ConstructPhysicsInteractor_FixedVertex_Sphere("resources/models/hands/PhysicsInteractorIndex_full_new_left.txt", particle_radius_, false, false, 0, "left");
+    //hand_->ConstructPhysicsInteractor_FullVertex_Sphere(particle_radius_, 0.02, false, false, "left");
+	hand_->ConstructPhysicsInteractor_FixedVertex_Sphere("resources/models/hands/PhysicsInteractorIndex_full_new.txt", particle_radius_, false, false, "both");
+	
+
+	
+	// attach listener function to physics interactor
+	hand_->AttachPhysicsInteractor_CollisionListener(std::bind(&HandManager::interactor_collision_event, this, std::placeholders::_1, std::placeholders::_2));
+	hand_->AttachPhysicsInteractor_InsideListener(std::bind(&HandManager::interactor_collision_event, this, std::placeholders::_1, std::placeholders::_2));
 
 
 
@@ -206,6 +247,21 @@ void HandManager::setup_hand(void)
 	if (props_.get("subsystem.unistmocap", false))
 	{
 		interface_unist_mocap_ = dynamic_cast<Kinesthetic_HandMoCAPInterface*>(crsf::TInterfaceManager::GetInstance()->GetInputInterface("KinestheticHandMoCAP"));
+
+		if (interface_unist_mocap_)
+		{
+			// version
+			if (interface_unist_mocap_->GetVersion() == "old")
+				unist_mocap_joint_number_ = 26;
+			else if (interface_unist_mocap_->GetVersion() == "new")
+				unist_mocap_joint_number_ = 28;
+
+			// mode
+			if (props_.get("subsystem.unistmocap_mode", "") == "left")
+				unist_mocap_mode_ = "left";
+			else if (props_.get("subsystem.unistmocap_mode", "") == "right")
+				unist_mocap_mode_ = "right";
+		}
 	}
 
 
