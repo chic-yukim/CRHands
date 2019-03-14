@@ -51,6 +51,7 @@ public:
 
 	// UNIST mocap
 	void render_unist_mocap(crsf::TAvatarMemoryObject *amo);
+	LQuaternionf rotate_unist_to_crsf(const LQuaternionf& quat);
 
 	// VIVE
 	void get_open_vr_module_data();
