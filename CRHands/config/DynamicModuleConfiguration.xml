@@ -22,7 +22,7 @@
 		<interface>
 			<input>KinestheticHandMoCAP</input>
             <output>KinestheticMoCAPHands</output>
-			<port>COM4</port>
+			<port>COM3</port>
 			<version>new</version>
 		</interface>
 	</kinesthetic_hand_mocap>
@@ -33,6 +33,7 @@
 			<handmocap_position>false</handmocap_position>
 			<handmocap_scale>true</handmocap_scale>
 			<unistmocap>false</unistmocap>
+			<unistmocap_mode>left</unistmocap_mode>
         </subsystem>
 		<tracker_serial>
 			<!-- 8 mech : LHR-15BB62C0 -->
