@@ -25,96 +25,6 @@ void CRHands::setup_jewelry()
 {
 	auto world = rendering_engine_->GetWorld();
 
-	//{
-	//	// load compound graphic model
-	//	auto compound_graphic = world->LoadModel("resources/models/jewelry/jewelry_bottom.egg");
-	//	compound_graphic->SetScale(0.001, world);
-
-	//	// create compound object
-	//	auto compound = crsf::CreateObject<crsf::TCompound>("jewelry_bottom_compounds", compound_graphic);
-	//	world->AddWorldObject(compound);
-
-	//	// add child object to compound object
-	//	auto cube = crsf::CreateObject<crsf::TCube>("jewelry_bottom_physics_cube", LVecBase3(0), LVecBase3(0));
-	//	compound->add_child_object(cube);
-	//	cube->SetPosition(LVecBase3(0));
-	//	cube->SetScale(LVecBase3(0.05, 0.05, 0.025), world);
-
-	//	// create physics model of compound
-	//	crsf::TPhysicsModel::Parameters params;
-	//	params.m_fMass = 10.0f;
-	//	params.m_fFriction = 10.0f;
-	//	compound->CreatePhysicsModel(params);
-	//	physics_manager_->AddModel(compound);
-
-	//	compound->PrintAll();
-	//	compound->SetPosition(LVecBase3(0, 0, 1), world);
-	//}
-
-	//{
-	//	// load compound's graphic model
-	//	auto compound_graphic = world->LoadModel("resources/models/jewelry/jewelry_bottom.egg");
-	//	compound_graphic->PrintAll();
-	//	compound_graphic->SetScale(0.001);
-
-	//	// create compound's physics model
-	//	auto compound_physics = crsf::CreateObject<crsf::TWorldObject>("jewelry_bottom_physics");
-	//	world->AddWorldObject(compound_physics);
-	//	auto cube = crsf::CreateObject<crsf::TCube>("jewelry_bottom_physics_cube", LVecBase3(0), LVecBase3(0.04, 0.04, 0.02));
-	//	compound_physics->AddWorldObject(cube);
-	//	cube->SetPosition(LVecBase3(0));
-
-	//	// create compound
-	//	auto compound = crsf::CreateObject<crsf::TCompound>("jewelry_bottom_compounds", 
-	//		compound_graphic, compound_physics.get(), crsf::ECOMPOUND_MODEL);
-	//	world->AddWorldObject(compound);
-
-	//	// create physics model of compound
-	//	crsf::TPhysicsModel::Parameters params;
-	//	params.m_fMass = 10.0f;
-	//	params.m_fFriction = 10.0f;
-	//	compound->CreatePhysicsModel(params);
-	//	physics_manager_->AddModel(compound);
-
-	//	compound->SetPosition(LVecBase3(0, 0, 1), world);
-	//}
-
-	//{
-	//	// load compound's graphic model
-	//	auto compound_graphic = world->LoadModel("resources/models/jewelry/jewelry_top.egg");
-	//	compound_graphic->PrintAll();
-	//	compound_graphic->SetScale(0.004);
-
-	//	// load compound's origin physics model
-	//	auto compound_physics_origin = world->LoadModel("resources/models/jewelry/jewelry_top_physics.egg");
-	//	compound_physics_origin->PrintAll();
-	//	compound_physics_origin->SetScale(0.004);
-	//	// set compound's physics model
-	//	auto compound_physics = crsf::CreateObject<crsf::TWorldObject>("jewelry_top_physics");
-	//	world->AddWorldObject(compound_physics);
-	//	for (auto& child : compound_physics_origin->GetChildren())
-	//	{
-	//		if (std::string(typeid(*(child.get())).name()) == "class crsf::TPandaModel")
-	//		{
-	//			compound_physics->AddWorldObject(child);
-	//			std::cout << child->GetName() << " is  added to " << compound_physics->GetName() << std::endl;
-	//		}
-	//	}
-
-	//	// create compound
-	//	auto compound = crsf::CreateObject<crsf::TCompound>("jewelry_top_compounds",
-	//		compound_graphic, compound_physics.get(), crsf::ECOMPOUND_CONVEXHULL);
-	//	world->AddWorldObject(compound);
-	//	compound->SetPosition(LVecBase3(0, 0, 1), world);
-
-	//	// create physics model of compound
-	//	crsf::TPhysicsModel::Parameters params;
-	//	params.m_fMass = 10.0f;
-	//	params.m_fFriction = 10.0f;
-	//	compound->CreatePhysicsModel(params);
-	//	physics_manager_->AddModel(compound);
-	//}
-
 	jewelry_ = std::make_shared<Jewelry>("jewerly_");
 	world->AddWorldObject(jewelry_);
 
@@ -122,11 +32,8 @@ void CRHands::setup_jewelry()
 
 	jewelry_->set_hinge_rotation(45);
 
-	jewelry_->attach_update_listener_each(std::bind(&HandManager::object_update_event, hand_manager_.get(), std::placeholders::_1));
-	//jewelry_->attach_update_listener(std::bind(&HandManager::grouped_object_update_event, hand_manager_.get(), std::placeholders::_1));
-
-	//jewelry_->attach_collision_listener_each(std::bind(&HandManager::object_collision_event, hand_manager_.get(), std::placeholders::_1, std::placeholders::_2));
-	//jewelry_->attach_separation_listener_each(std::bind(&HandManager::object_separation_event, hand_manager_.get(), std::placeholders::_1, std::placeholders::_2));
+	jewelry_->attach_update_listener_each(std::bind(&HandManager::grouped_object_update_event_each, hand_manager_.get(), std::placeholders::_1));
+	jewelry_->attach_update_listener(std::bind(&HandManager::grouped_object_update_event, hand_manager_.get(), std::placeholders::_1));
 }
 
 Jewelry::Jewelry(const std::string& name) : TGroupedObjectsBase(name)
@@ -165,7 +72,6 @@ void Jewelry::initialize_grouped_objects(double scale, const LVecBase3& pos)
 	{
 		// load compound's graphic model
 		auto compound_graphic = world->LoadModel("resources/models/jewelry/jewelry_bottom.egg");
-		compound_graphic->PrintAll();
 		compound_graphic->SetScale(0.001, world);
 
 		// create compound's physics model
@@ -196,7 +102,6 @@ void Jewelry::initialize_grouped_objects(double scale, const LVecBase3& pos)
 	{
 		// load compound's graphic model
 		auto compound_graphic = world->LoadModel("resources/models/jewelry/jewelry_top.egg");
-		compound_graphic->PrintAll();
 		compound_graphic->SetScale(0.001, world);
 
 		// create compound's physics model

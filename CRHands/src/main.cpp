@@ -35,14 +35,20 @@ void CRHands::OnLoad(void)
 	pipeline_ = rendering_engine_->GetRenderPipeline();
 
 	rendering_engine_->SetWindowTitle(CRMODULE_ID_STRING);
-	if (!crsf::TDynamicModuleManager::GetInstance()->IsModuleEnabled("openvr"))
+	/*if (!crsf::TDynamicModuleManager::GetInstance()->IsModuleEnabled("openvr"))
 	{
 		rendering_engine_->EnableControl();
 		rendering_engine_->SetControllerInitialPosHpr(
 			LVecBase3(0.0f, -2.2f, 1.0f),
 			LVecBase3(0.0f, -25.0f, 0.0f));
 		rendering_engine_->ResetControllerInitial();
-	}
+	}*/
+
+	rendering_engine_->EnableControl();
+	rendering_engine_->SetControllerInitialPosHpr(
+		LVecBase3(0.0f, -2.2f, 1.0f),
+		LVecBase3(0.0f, -25.0f, 0.0f));
+	rendering_engine_->ResetControllerInitial();
 }
 
 void CRHands::OnStart(void)
