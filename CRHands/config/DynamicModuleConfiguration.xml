@@ -47,7 +47,9 @@
 			<create>
 				<ground>true</ground>
 				<table>true</table>
-				<cubes>true</cubes>
+				<cubes>false</cubes>
+				<jewelry>true</jewelry>
+				<twisty_puzzle>false</twisty_puzzle>
 			</create>
 			<table>
 				<is_compound>false</is_compound>
