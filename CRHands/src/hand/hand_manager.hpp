@@ -63,6 +63,9 @@ public:
 	bool object_separation_event(const std::shared_ptr<crsf::TCRModel>& my_model, const std::shared_ptr<crsf::TCRModel>& evented_model);
 	bool object_update_event(const std::shared_ptr<crsf::TCRModel>& my_model);
 
+	bool grouped_object_update_event_each(const std::shared_ptr<crsf::TCRModel>& my_model);
+	bool grouped_object_update_event(const std::shared_ptr<crsf::TCRModel>& my_model);
+
 private:
 	CRHands& app_;
 
@@ -116,6 +119,9 @@ private:
 
 	// physics particle
 	float particle_radius_ = 0.0025f;
+
+	// grasp algorithm
+	std::vector<crsf::TWorldObject*> hand_pointer_;
 };
 
 inline crsf::TCRHand* HandManager::get_hand() const

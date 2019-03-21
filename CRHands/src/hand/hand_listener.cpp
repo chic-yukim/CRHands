@@ -19,6 +19,10 @@
 
 #include <crsf/CRModel/THandPhysicsInteractor.h>
 
+#include <crsf/CRModel/TGroupedObjects.h>
+#include <crsf/CRModel/TGroupedObjectsBase.h>
+
+
 #include <spdlog/spdlog.h>
 
 #include <hand_mocap_module.h>
@@ -42,7 +46,7 @@ bool HandManager::interactor_collision_event(const std::shared_ptr<crsf::TCRMode
 	LVecBase3 direction = my_contact_info->GetNormalWorldOnB();
 
 	// set penetration direction on physics interactor
-	crsf::THandPhysicsInteractor* my_physics_interactor = hand_->FindPhysicsInteractor(my_model);
+	auto my_physics_interactor = hand_->FindPhysicsInteractor(my_model);
 	my_physics_interactor->SetPenetrationDirection(direction);
 	my_physics_interactor->SetPenetrationDirection(my_physics_interactor->GetPenetrationDirection().normalized());
 
@@ -166,8 +170,8 @@ bool HandManager::object_update_event(const std::shared_ptr<crsf::TCRModel>& my_
 	// test grasp kinematic feasibility
 	LMatrix4f hand_to_world;
 	int contacted_interactor_size = current_contacted_physics_interactor.size();
-	crsf::THandPhysicsInteractor* intr1;
-	crsf::THandPhysicsInteractor* intr2;
+	std::shared_ptr<crsf::THandPhysicsInteractor> intr1;
+	std::shared_ptr<crsf::THandPhysicsInteractor> intr2;
 	LVecBase3 dir1, dir2;
 	int joint1, joint2;
 	for (int i = 0; i < contacted_interactor_size; i++)
@@ -259,6 +263,372 @@ bool HandManager::object_update_event(const std::shared_ptr<crsf::TCRModel>& my_
 		my_physics_model->SetPhysicsType(crsf::EPHYX_TYPE_RIGIDBODY_ACTIVE);
 		hand_->SetIsTouched(false);
 	}
+
+	return false;
+}
+
+
+bool HandManager::grouped_object_update_event_each(const std::shared_ptr<crsf::TCRModel>& my_model)
+{
+	my_model->contacted_hand_pointer.clear();
+	my_model->is_contacted = false;
+	for (auto & contacted_model : my_model->GetPhysicsModel()->GetContactInfo()->GetContactedModel())
+	{
+		auto interactor = dynamic_pointer_cast<crsf::THandPhysicsInteractor>(contacted_model);
+		if (!interactor)
+			continue;
+
+		auto interactor_joint_tag = interactor->GetConnectedJointTag();
+		crsf::TWorldObject* parent_hand_model = nullptr;
+		if (interactor_joint_tag >= 0 && interactor_joint_tag <= 21)
+			parent_hand_model = interactor->GetParentHandModel()->Get3DModel_LeftWrist();
+		else if (interactor_joint_tag >= 22 && interactor_joint_tag <= 43)
+			parent_hand_model = interactor->GetParentHandModel()->Get3DModel_RightWrist();
+		my_model->contacted_hand_pointer.push_back(parent_hand_model);
+
+		for (int i = 0; i < my_model->contacted_hand_pointer.size() - 1; i++)
+		{
+			if (my_model->contacted_hand_pointer[i] == parent_hand_model)
+			{
+				my_model->contacted_hand_pointer.pop_back();
+			}
+		}
+
+		my_model->is_contacted = true;
+		my_model->contacted_physics_particle.push_back(interactor.get());
+	}
+	return false;
+}
+
+bool HandManager::grouped_object_update_event(const std::shared_ptr<crsf::TCRModel>& my_model)
+{
+	auto world = crsf::TGraphicRenderEngine::GetInstance()->GetWorld();
+
+	auto grouped_object_base = dynamic_pointer_cast<crsf::TGroupedObjectsBase>(my_model);
+
+	if (!grouped_object_base)
+	{
+		global_logger->error("grouped_object_update_event should define on TGroupedObjectsBase.");
+		return false;
+	}
+
+	// first, check each object's contacted state
+	std::vector<shared_ptr<crsf::TCRModel>> contacted_children;
+
+	for (int i = 0; i < grouped_object_base->GetChildren().size(); i++)
+	{
+		auto sub_group = dynamic_pointer_cast<crsf::TGroupedObjects>(grouped_object_base->GetChild(i)->shared_from_this());
+
+		if (sub_group)
+		{
+			for (int j = 0; j < sub_group->GetChildren().size(); j++)
+			{
+				auto child_model = dynamic_pointer_cast<crsf::TCRModel>(sub_group->GetChild(j)->shared_from_this());
+
+				if (!child_model)
+					continue;
+
+				if (child_model->is_contacted)
+					contacted_children.push_back(child_model);
+			}
+		}
+	}
+
+	// distinguish Contacted Hand
+	int number_of_hand = 2;
+	if (grouped_object_base->is_multi_user_connect)
+		number_of_hand = 4;
+
+	std::vector<shared_ptr<crsf::TCRModel>> *contacted_hand = new std::vector<shared_ptr<crsf::TCRModel>>[number_of_hand];
+
+	for (int i = 0; i < contacted_children.size(); i++)
+	{
+		for (int j = 0; j < contacted_children[i]->contacted_hand_pointer.size(); j++)
+		{
+			if (hand_pointer_[0] == contacted_children[i]->contacted_hand_pointer[j]) // right hand
+			{
+				contacted_hand[0].push_back(contacted_children[i]);
+			}
+
+			if (hand_pointer_[1] == contacted_children[i]->contacted_hand_pointer[j]) // left hand
+			{
+				contacted_hand[1].push_back(contacted_children[i]);
+			}
+
+			if (grouped_object_base->is_multi_user_connect)
+			{
+				// TBA, multi-user is not considered yet.
+			}
+		}
+	}
+
+	// determine grasping
+	std::map<crsf::TWorldObject*, bool> hand_grasped;
+
+	if (grouped_object_base->is_multi_mesh_group)
+	{
+		// TBA, multi-mesh group is not considered yet.
+	}
+	else
+	{
+		for (int n = 0; n < number_of_hand; n++)
+		{
+			hand_grasped[hand_pointer_[n]] = false;
+
+			for (int i = 0; i < contacted_hand[n].size(); i++)
+			{
+				for (int j = 0; j < contacted_hand[n][i]->contacted_physics_particle.size(); j++)
+				{
+					for (int k = j; k < contacted_hand[n][i]->contacted_physics_particle.size(); k++)
+					{
+						auto object_1_contact_hand = contacted_hand[n][i]->contacted_physics_particle[j];
+						auto object_2_contact_hand = contacted_hand[n][i]->contacted_physics_particle[k];
+
+						LVecBase3 direction_1 = object_1_contact_hand->GetPenetrationDirection();
+						LVecBase3 direction_2 = object_2_contact_hand->GetPenetrationDirection();
+
+						float cos_angle = direction_1.dot(direction_2);
+
+						if (cos_angle < -0.7)
+						{
+							if (!grouped_object_base->primary_grasped_hand_pointer)
+							{
+								grouped_object_base->primary_grasped_hand_pointer = hand_pointer_[n];
+								grouped_object_base->primary_grasped_hand_number = n;
+							}
+							else
+							{
+								if (grouped_object_base->primary_grasped_hand_pointer != hand_pointer_[n])
+								{
+									grouped_object_base->secondary_grasped_hand_pointer = hand_pointer_[n];
+									grouped_object_base->secondary_grasped_hand_number = n;
+								}
+							}
+
+							hand_grasped[hand_pointer_[n]] = true;
+							goto out1;
+						}
+					}
+				}
+			}
+		out1:;
+		}
+	}
+
+	// counting grasped hand
+	int grasped_count = 0;
+	for (int i = 0; i < number_of_hand; i++)
+	{
+		if (hand_grasped[hand_pointer_[i]])
+		{
+			grasped_count++;
+		}
+	}
+
+	// two hand grasped case
+	if (grasped_count >= 2)
+	{
+		if (grouped_object_base->release_object)
+		{
+			if (grouped_object_base->is_group_changeable) // grouping
+			{
+				//grouped_object_base->grouped_objects_grouping(contacted_hand);
+			}
+
+			if (grouped_object_base->grouped_object_data[0].axis_on_object != LVecBase3(-1) ||
+				grouped_object_base->grouped_object_data[1].axis_on_object != LVecBase3(-1))
+			{
+				grouped_object_base->release_object = false;
+			}
+		}
+
+		if (grouped_object_base->grouped_object_data[0].axis_on_object != LVecBase3(-1) ||
+			grouped_object_base->grouped_object_data[1].axis_on_object != LVecBase3(-1))
+		{
+			int primary_hand_number = grouped_object_base->primary_grasped_hand_number;
+			int secondary_hand_number = grouped_object_base->secondary_grasped_hand_number;
+			grouped_object_base->grasped_hand[0] = (crsf::TWorldObject*)grouped_object_base->primary_grasped_hand_pointer;
+			grouped_object_base->grasped_hand[1] = (crsf::TWorldObject*)grouped_object_base->secondary_grasped_hand_pointer;
+
+			int sub_group_0 = 0, sub_group_1 = 0;
+			for (int i = 0; i < contacted_hand[primary_hand_number].size(); i++)
+			{
+				if (grouped_object_base->sub_group[0] == dynamic_pointer_cast<crsf::TGroupedObjects>(contacted_hand[primary_hand_number][i]->GetParent()->shared_from_this()))
+				{
+					sub_group_0++;
+				}
+				else if (grouped_object_base->sub_group[1] == dynamic_pointer_cast<crsf::TGroupedObjects>(contacted_hand[primary_hand_number][i]->GetParent()->shared_from_this()))
+				{
+					sub_group_1++;
+				}
+			}
+
+			if (sub_group_0 > sub_group_1)
+			{
+				grouped_object_base->grasped_object[0] = grouped_object_base->sub_group[0];
+				grouped_object_base->grasped_object[1] = grouped_object_base->sub_group[1];
+
+				grouped_object_base->grasped_object_data[0] = grouped_object_base->grouped_object_data[0];
+				grouped_object_base->grasped_object_data[1] = grouped_object_base->grouped_object_data[1];
+			}
+			else if (sub_group_0 < sub_group_1)
+			{
+				grouped_object_base->grasped_object[0] = grouped_object_base->sub_group[1];
+				grouped_object_base->grasped_object[1] = grouped_object_base->sub_group[0];
+
+				grouped_object_base->grasped_object_data[0] = grouped_object_base->grouped_object_data[1];
+				grouped_object_base->grasped_object_data[1] = grouped_object_base->grouped_object_data[0];
+			}
+			else if (sub_group_0 == sub_group_1)
+			{
+				unsigned long long number_of_sub_group_contacted_mesh[2] = { 0, };
+
+				for (int i = 0; i < 2; i++)
+				{
+					for (int j = 0; j < grouped_object_base->sub_group[i]->GetChildren().size(); j++)
+					{
+						auto model = dynamic_pointer_cast<crsf::TCRModel>(grouped_object_base->sub_group[i]->GetChild(i)->shared_from_this());
+						for (int k = 0; k < model->contacted_physics_particle.size(); k++)
+						{
+							auto interactor = model->contacted_physics_particle[k];
+							auto interactor_joint_tag = interactor->GetConnectedJointTag();
+							crsf::TWorldObject* parent_hand_model = nullptr;
+							if (interactor_joint_tag >= 0 && interactor_joint_tag <= 21)
+								parent_hand_model = interactor->GetParentHandModel()->Get3DModel_LeftWrist();
+							else if (interactor_joint_tag >= 22 && interactor_joint_tag <= 43)
+								parent_hand_model = interactor->GetParentHandModel()->Get3DModel_RightWrist();
+
+							if (parent_hand_model == (crsf::TWorldObject*)grouped_object_base->primary_grasped_hand_pointer)
+							{
+								number_of_sub_group_contacted_mesh[i] += model->contacted_physics_particle.size();
+							}
+						}
+					}
+				}
+
+				if (number_of_sub_group_contacted_mesh[0] > number_of_sub_group_contacted_mesh[1])
+				{
+					grouped_object_base->grasped_object[0] = grouped_object_base->sub_group[0];
+					grouped_object_base->grasped_object[1] = grouped_object_base->sub_group[1];
+
+					grouped_object_base->grasped_object_data[0] = grouped_object_base->grouped_object_data[0];
+					grouped_object_base->grasped_object_data[1] = grouped_object_base->grouped_object_data[1];
+				}
+				else if (number_of_sub_group_contacted_mesh[0] < number_of_sub_group_contacted_mesh[1])
+				{
+					grouped_object_base->grasped_object[0] = grouped_object_base->sub_group[1];
+					grouped_object_base->grasped_object[1] = grouped_object_base->sub_group[0];
+
+					grouped_object_base->grasped_object_data[0] = grouped_object_base->grouped_object_data[1];
+					grouped_object_base->grasped_object_data[1] = grouped_object_base->grouped_object_data[0];
+				}
+			}
+
+			if (grouped_object_base->manipulated_object != grouped_object_base->grasped_object[1])
+			{
+				auto primary_hand = (crsf::TWorldObject*)grouped_object_base->primary_grasped_hand_pointer;
+				LMatrix4f world_to_hand = primary_hand->GetMatrix(world);
+				LMatrix4f world_to_group = grouped_object_base->GetMatrix(world);
+
+				LMatrix4f transform_coordinate = LMatrix4f::ident_mat();
+				transform_coordinate.set_row(3, grouped_object_base->grasped_object_data[0].pivot_on_object);
+				LVecBase3 pivot_translation = grouped_object_base->grasped_object_data[0].pivot_on_object_in_group
+					- grouped_object_base->grasped_object_data[0].pivot_on_object;
+				LMatrix4f pivot_transform = LMatrix4f::ident_mat();
+				pivot_transform.set_row(3, pivot_translation);
+				LMatrix4f sub_group_to_sub_group_relative_transform = grouped_object_base->grasped_object[0]->GetMatrix();
+				sub_group_to_sub_group_relative_transform = sub_group_to_sub_group_relative_transform * invert(pivot_transform);
+
+				LMatrix4f hand_to_group = sub_group_to_sub_group_relative_transform * world_to_group * invert(world_to_hand);
+
+				grouped_object_base->SetMatrix(hand_to_group);
+
+				grouped_object_base->grasped_object[1]->SetMatrix(invert(grouped_object_base->grasped_object[0]->GetMatrix()));
+				grouped_object_base->grasped_object[0]->SetMatrix(LMatrix4f::ident_mat());
+			}
+
+			grouped_object_base->manipulated_object = grouped_object_base->grasped_object[1];
+
+			if (grouped_object_base->first_time)
+			{
+				for (int i = 0; i < 2; i++)
+				{
+					LMatrix4f world_to_hand = grouped_object_base->grasped_hand[i]->GetMatrix(world);
+					LMatrix4f world_to_sub_group = grouped_object_base->grasped_object[i]->GetMatrix(world);
+
+					grouped_object_base->fixed_relative_transform[i] = world_to_sub_group;
+					grouped_object_base->fixed_relative_transform[i] = grouped_object_base->fixed_relative_transform[i] * invert(world_to_hand);
+				}
+
+				grouped_object_base->first_time = false;
+			}
+
+			for (int i = 0; i < 2; i++)
+			{
+				LMatrix4f world_to_hand = grouped_object_base->grasped_hand[i]->GetMatrix(world);
+
+				grouped_object_base->current_hand_global_pose[i] = grouped_object_base->fixed_relative_transform[i];
+				grouped_object_base->current_hand_global_pose[i] = grouped_object_base->current_hand_global_pose[i] * world_to_hand;
+			}
+
+			// TBA, 
+			// TODO : constrained object control algorithm
+
+		}
+	}
+	else
+	{
+		grouped_object_base->first_time = true;
+	}
+
+	if (grasped_count >= 1)
+	{
+		crsf::TWorldObject* primary_hand;
+		if (grasped_count == 1)
+		{
+			for (int i = 0; i < number_of_hand; i++)
+			{
+				if (hand_grasped[hand_pointer_[i]])
+				{
+					primary_hand = hand_pointer_[i];
+					grouped_object_base->primary_grasped_hand_pointer = primary_hand;
+					grouped_object_base->primary_grasped_hand_number = i;
+
+					break;
+				}
+			}
+		}
+		else
+		{
+			primary_hand = (crsf::TWorldObject*)grouped_object_base->primary_grasped_hand_pointer;
+		}
+
+		LMatrix4f world_to_hand = primary_hand->GetMatrix(world);
+		LMatrix4f world_to_cube = grouped_object_base->GetMatrix(world);
+		LMatrix4f hand_to_cube = world_to_cube * invert(world_to_hand);
+
+		primary_hand->AddWorldObject(grouped_object_base);
+		grouped_object_base->SetMatrix(hand_to_cube);
+	}
+	else
+	{
+		world->AddWorldObject(grouped_object_base);
+
+		auto right_hand = hand_pointer_[0];
+		auto left_hand = hand_pointer_[1];
+
+		if (grouped_object_base->is_multi_user_connect)
+		{
+			// TBA, multi-user is not considered yet.
+		}
+
+		grouped_object_base->primary_grasped_hand_pointer = nullptr;
+		grouped_object_base->secondary_grasped_hand_pointer = nullptr;
+
+		grouped_object_base->release_object = true;
+	}
+
+	delete[] contacted_hand;
 
 	return false;
 }

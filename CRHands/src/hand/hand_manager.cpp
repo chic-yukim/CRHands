@@ -222,6 +222,14 @@ void HandManager::setup_hand(void)
 	// attach listener function to physics interactor
 	hand_->AttachPhysicsInteractor_CollisionListener(std::bind(&HandManager::interactor_collision_event, this, std::placeholders::_1, std::placeholders::_2));
 	hand_->AttachPhysicsInteractor_InsideListener(std::bind(&HandManager::interactor_collision_event, this, std::placeholders::_1, std::placeholders::_2));
+	hand_->SetPhysicsInteractor_RigidObject();
+	hand_->SetPhysicsInteractor_Mass(1.0f);
+
+
+
+	// grasp algorithm
+	hand_pointer_.push_back(hand_->Get3DModel_RightWrist());
+	hand_pointer_.push_back(hand_->Get3DModel_LeftWrist());
 
 
 

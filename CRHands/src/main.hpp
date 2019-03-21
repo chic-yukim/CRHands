@@ -15,6 +15,7 @@ namespace crsf {
 }
 
 class HandManager;
+class Jewelry;
 
 class CRHands: public crsf::TDynamicModuleInterface, public rppanda::DirectObject
 {
@@ -26,14 +27,16 @@ public:
 	void OnStart(void) override;
 	void OnExit(void) override;
 
+	void setup_event();
 	void setup_physics();
-
 	void setup_hand();
 
 	void setup_scene();
 	void setup_ground();
 	void setup_table();
 	void setup_cubes();
+	void setup_jewelry();
+	void setup_twisty_puzzle();
 
 	void reset_cubes_position();
 
@@ -59,4 +62,7 @@ private:
 
 	// soma cube
 	std::vector<std::shared_ptr<crsf::TCube>> cubes_;
+
+	// jewelry
+	std::shared_ptr<Jewelry> jewelry_ = nullptr;
 };

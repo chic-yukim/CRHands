@@ -49,15 +49,16 @@ void CRHands::OnStart(void)
 {
 	srand((unsigned int)time(NULL));
 
+	setup_event();
 	setup_hand();
 	setup_scene();
 
     main_gui_ = std::make_unique<MainGUI>(*this);
 
-	do_method_later(1.0f, [this](rppanda::FunctionalTask* task) {
+	/*do_method_later(1.0f, [this](rppanda::FunctionalTask* task) {
 		physics_manager_->Start();
 		return AsyncTask::DoneStatus::DS_done;
-	}, "CRHands::start_physics");
+	}, "CRHands::start_physics");*/
 }
 
 void CRHands::OnExit(void)
@@ -69,6 +70,18 @@ void CRHands::OnExit(void)
 	physics_manager_->Exit();
 
 	hand_manager_.reset();
+}
+
+void CRHands::setup_event()
+{
+	accept("f1", [this](const Event*) {
+		crsf::TGraphicRenderEngine* rendering_engine = crsf::TGraphicRenderEngine::GetInstance();
+		rendering_engine->GetRenderNode()->GetNodePath().ls();
+	});
+
+	accept("0", [this](const Event*) {
+		physics_manager_->Start();
+	});
 }
 
 void CRHands::setup_physics()
@@ -92,4 +105,8 @@ void CRHands::setup_scene()
 		setup_table();
 	if (m_property.get("object.create.cubes", false))
 		setup_cubes();
+	if (m_property.get("object.create.jewelry", false))
+		setup_jewelry();
+	if (m_property.get("object.create.twisty_puzzle", false))
+		setup_twisty_puzzle();
 }
