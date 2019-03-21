@@ -32,6 +32,10 @@ set(source_hand
 set(source_object
     "${PROJECT_SOURCE_DIR}/src/object/base_object.cpp"
     "${PROJECT_SOURCE_DIR}/src/object/soma_cube.cpp"
+	"${PROJECT_SOURCE_DIR}/src/object/jewelry.cpp"
+	"${PROJECT_SOURCE_DIR}/src/object/jewelry.hpp"
+	"${PROJECT_SOURCE_DIR}/src/object/twisty_puzzle.cpp"
+	"${PROJECT_SOURCE_DIR}/src/object/twisty_puzzle.hpp"
 )
 
 set(source_util
