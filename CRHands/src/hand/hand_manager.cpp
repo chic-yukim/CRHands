@@ -172,10 +172,21 @@ void HandManager::setup_hand(void)
 	crsf::TCRProperty hand_property;
 	hand_property.m_propAvatar.SetJointNumber(44);
 	hand_property.m_propHand.m_strName = "Hand";
-	float m_vec3fZeroToSensor_x = props_.get("handprop.m_vec3fZeroToSensor_x", 0.0f);
-	float m_vec3fZeroToSensor_y = props_.get("handprop.m_vec3fZeroToSensor_y", 0.0f);
-	float m_vec3fZeroToSensor_z = props_.get("handprop.m_vec3fZeroToSensor_z", 0.0f);
-	hand_property.m_propHand.m_vec3ZeroToSensor = LVecBase3(m_vec3fZeroToSensor_x, m_vec3fZeroToSensor_y, m_vec3fZeroToSensor_z);
+	float leap_local_translation_x, leap_local_translation_y, leap_local_translation_z;
+	// VR mode - leap local translation is 'HMD-to-LEAP'
+	if (crsf::TDynamicModuleManager::GetInstance()->IsModuleEnabled("openvr"))
+	{
+		leap_local_translation_x = props_.get("hand.HMD_to_LEAP_x", 0.0f);
+		leap_local_translation_y = props_.get("hand.HMD_to_LEAP_y", 0.0f);
+		leap_local_translation_z = props_.get("hand.HMD_to_LEAP_z", 0.0f);
+	}
+	else // mono mode - leap local translation is 'zero-to-LEAP'
+	{
+		leap_local_translation_x = props_.get("hand.zero_to_LEAP_x", 0.0f);
+		leap_local_translation_y = props_.get("hand.zero_to_LEAP_y", 0.0f);
+		leap_local_translation_z = props_.get("hand.zero_to_LEAP_z", 0.0f);
+	}
+	hand_property.m_propHand.m_vec3ZeroToSensor = LVecBase3(leap_local_translation_x, leap_local_translation_y, leap_local_translation_z);
 	hand_property.m_propHand.SetRenderMode(false, false, true);
 
 

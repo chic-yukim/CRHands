@@ -74,10 +74,13 @@
 				<count>60</count>
 			</cubes>
 		</object>
-		<handprop>
-            <m_vec3fZeroToSensor_x>0.0</m_vec3fZeroToSensor_x>
-            <m_vec3fZeroToSensor_y>0.09</m_vec3fZeroToSensor_y>
-			<m_vec3fZeroToSensor_z>-0.01</m_vec3fZeroToSensor_z>
-        </handprop>
+		<hand>
+            <HMD_to_LEAP_x>0.0</HMD_to_LEAP_x>
+            <HMD_to_LEAP_y>0.09</HMD_to_LEAP_y>
+			<HMD_to_LEAP_z>-0.01</HMD_to_LEAP_z>
+			<zero_to_LEAP_x>0.0</zero_to_LEAP_x>
+            <zero_to_LEAP_y>-0.15</zero_to_LEAP_y>
+			<zero_to_LEAP_z>0.5</zero_to_LEAP_z>
+        </hand>
     </CRHands>
 </modules>

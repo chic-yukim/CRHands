@@ -10,6 +10,7 @@
 #include <render_pipeline/rpcore/globals.hpp>
 
 #include <crsf/CoexistenceInterface/TDynamicStageMemory.h>
+#include <crsf/CREngine/TDynamicModuleManager.h>
 
 #include <crsf/RenderingEngine/TGraphicRenderEngine.h>
 #include <crsf/CRModel/TWorld.h>
@@ -33,13 +34,21 @@ void HandManager::render_hand_leap(crsf::TAvatarMemoryObject *amo)
 		//////////////////////////////////////////////////////////////////////////
 		// <<< Orbit >>>
 		// Translation to designated hand pose (set sensor's origin on CRSF)
-		LMatrix4f zeroToSensorMatrix;
+		LMatrix4f zeroToSensorMatrix = LMatrix4f::ident_mat();
 		zeroToSensorMatrix.set_translate_mat(hand_->GetHandProperty().m_vec3ZeroToSensor);
 
-		// set orbit matrix
-		auto cam_matrix = rpcore::Globals::base->get_cam().get_mat(rpcore::Globals::render);
-		cam_matrix.set_row(3, cam_matrix.get_row3(3) / crsf::TGraphicRenderEngine::GetInstance()->GetRenderingScaleFactor());
-		node_hmd_->SetMatrix(zeroToSensorMatrix * cam_matrix);
+		// VR mode - leap local translation is 'HMD-to-LEAP'
+		if (crsf::TDynamicModuleManager::GetInstance()->IsModuleEnabled("openvr"))
+		{
+			// set orbit matrix (following camera)
+			auto cam_matrix = rpcore::Globals::base->get_cam().get_mat(rpcore::Globals::render);
+			cam_matrix.set_row(3, cam_matrix.get_row3(3) / crsf::TGraphicRenderEngine::GetInstance()->GetRenderingScaleFactor());
+			node_hmd_->SetMatrix(zeroToSensorMatrix * cam_matrix);
+		}
+		else // mono mode - leap local translation is 'zero-to-LEAP'
+		{
+			node_hmd_->SetMatrix(zeroToSensorMatrix);
+		}
 
 		// # joint
 		int nJointNumber = hand_->GetJointNumber();
