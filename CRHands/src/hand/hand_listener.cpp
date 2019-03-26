@@ -274,7 +274,7 @@ bool HandManager::grouped_object_update_event_each(const std::shared_ptr<crsf::T
 	my_model->is_contacted = false;
 	for (auto & contacted_model : my_model->GetPhysicsModel()->GetContactInfo()->GetContactedModel())
 	{
-		auto interactor = dynamic_pointer_cast<crsf::THandPhysicsInteractor>(contacted_model);
+		auto interactor = std::dynamic_pointer_cast<crsf::THandPhysicsInteractor>(contacted_model);
 		if (!interactor)
 			continue;
 
@@ -304,7 +304,7 @@ bool HandManager::grouped_object_update_event(const std::shared_ptr<crsf::TCRMod
 {
 	auto world = crsf::TGraphicRenderEngine::GetInstance()->GetWorld();
 
-	auto grouped_object_base = dynamic_pointer_cast<crsf::TGroupedObjectsBase>(my_model);
+	auto grouped_object_base = std::dynamic_pointer_cast<crsf::TGroupedObjectsBase>(my_model);
 
 	if (!grouped_object_base)
 	{
@@ -317,13 +317,13 @@ bool HandManager::grouped_object_update_event(const std::shared_ptr<crsf::TCRMod
 
 	for (int i = 0; i < grouped_object_base->GetChildren().size(); i++)
 	{
-		auto sub_group = dynamic_pointer_cast<crsf::TGroupedObjects>(grouped_object_base->GetChild(i)->shared_from_this());
+		auto sub_group = std::dynamic_pointer_cast<crsf::TGroupedObjects>(grouped_object_base->GetChild(i)->shared_from_this());
 
 		if (sub_group)
 		{
 			for (int j = 0; j < sub_group->GetChildren().size(); j++)
 			{
-				auto child_model = dynamic_pointer_cast<crsf::TCRModel>(sub_group->GetChild(j)->shared_from_this());
+				auto child_model = std::dynamic_pointer_cast<crsf::TCRModel>(sub_group->GetChild(j)->shared_from_this());
 
 				if (!child_model)
 					continue;
@@ -453,11 +453,11 @@ bool HandManager::grouped_object_update_event(const std::shared_ptr<crsf::TCRMod
 			int sub_group_0 = 0, sub_group_1 = 0;
 			for (int i = 0; i < contacted_hand[primary_hand_number].size(); i++)
 			{
-				if (grouped_object_base->sub_group[0] == dynamic_pointer_cast<crsf::TGroupedObjects>(contacted_hand[primary_hand_number][i]->GetParent()->shared_from_this()))
+				if (grouped_object_base->sub_group[0] == std::dynamic_pointer_cast<crsf::TGroupedObjects>(contacted_hand[primary_hand_number][i]->GetParent()->shared_from_this()))
 				{
 					sub_group_0++;
 				}
-				else if (grouped_object_base->sub_group[1] == dynamic_pointer_cast<crsf::TGroupedObjects>(contacted_hand[primary_hand_number][i]->GetParent()->shared_from_this()))
+				else if (grouped_object_base->sub_group[1] == std::dynamic_pointer_cast<crsf::TGroupedObjects>(contacted_hand[primary_hand_number][i]->GetParent()->shared_from_this()))
 				{
 					sub_group_1++;
 				}
@@ -487,7 +487,7 @@ bool HandManager::grouped_object_update_event(const std::shared_ptr<crsf::TCRMod
 				{
 					for (int j = 0; j < grouped_object_base->sub_group[i]->GetChildren().size(); j++)
 					{
-						auto model = dynamic_pointer_cast<crsf::TCRModel>(grouped_object_base->sub_group[i]->GetChild(i)->shared_from_this());
+						auto model = std::dynamic_pointer_cast<crsf::TCRModel>(grouped_object_base->sub_group[i]->GetChild(i)->shared_from_this());
 						for (int k = 0; k < model->contacted_physics_particle.size(); k++)
 						{
 							auto interactor = model->contacted_physics_particle[k];
