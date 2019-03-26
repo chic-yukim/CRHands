@@ -26,9 +26,11 @@
         </module>
 		-->
 		
+		<!--
 		<module>
             <id>openvr</id>
         </module>
+		-->
 		
         <application>
             <id>CRHands</id>

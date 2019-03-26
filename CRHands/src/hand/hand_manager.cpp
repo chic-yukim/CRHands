@@ -223,7 +223,7 @@ void HandManager::setup_hand(void)
 	hand_->AttachPhysicsInteractor_CollisionListener(std::bind(&HandManager::interactor_collision_event, this, std::placeholders::_1, std::placeholders::_2));
 	hand_->AttachPhysicsInteractor_InsideListener(std::bind(&HandManager::interactor_collision_event, this, std::placeholders::_1, std::placeholders::_2));
 	hand_->SetPhysicsInteractor_RigidObject();
-	hand_->SetPhysicsInteractor_Mass(1.0f);
+	hand_->SetPhysicsInteractor_Mass(0.0f);
 
 
 
