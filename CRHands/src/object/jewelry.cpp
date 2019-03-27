@@ -32,6 +32,8 @@ void CRHands::setup_jewelry()
 
 	jewelry_->set_hinge_rotation(45);
 
+	jewelry_->attach_collision_listener_each(std::bind(&HandManager::object_collision_event, hand_manager_.get(), std::placeholders::_1, std::placeholders::_2));
+	jewelry_->attach_inside_listener_each(std::bind(&HandManager::object_collision_event, hand_manager_.get(), std::placeholders::_1, std::placeholders::_2));
 	jewelry_->attach_update_listener_each(std::bind(&HandManager::grouped_object_update_event_each, hand_manager_.get(), std::placeholders::_1));
 	jewelry_->attach_update_listener(std::bind(&HandManager::grouped_object_update_event, hand_manager_.get(), std::placeholders::_1));
 }
