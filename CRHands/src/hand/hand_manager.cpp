@@ -35,6 +35,9 @@
 #include <openvr_plugin.hpp>
 #endif
 
+#include <leapmotion_module.h>
+#include <leapmotion_interface.h>
+
 #include <hand_mocap_module.h>
 #include <hand_mocap_interface.h>
 
@@ -241,6 +244,16 @@ void HandManager::setup_hand(void)
 	// grasp algorithm
 	hand_pointer_.push_back(hand_->Get3DModel_RightWrist());
 	hand_pointer_.push_back(hand_->Get3DModel_LeftWrist());
+
+
+
+	// init LEAP setting
+	if (props_.get("subsystem.leap", false))
+	{
+		interface_leap_ = dynamic_cast<LeapMotionInterface*>(crsf::TInterfaceManager::GetInstance()->GetInputInterface("LeapMotion"));
+
+		leap_mode_ = interface_leap_->GetMode();
+	}
 
 
 

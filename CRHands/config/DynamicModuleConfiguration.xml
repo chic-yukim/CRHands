@@ -4,6 +4,8 @@
         <interface>
             <input>LeapMotion</input>
             <output>Hands</output>
+			<service_type>interpolation</service_type>
+			<mode>floor</mode>
         </interface>
     </leapmotion>
 	<hand_mocap>

@@ -27,7 +27,7 @@ include(FindPackages)
 find_package(imgui CONFIG REQUIRED)
 set_target_properties(imgui::imgui PROPERTIES MAP_IMPORTED_CONFIG_RELWITHDEBINFO RELEASE)
 
-CRSeedLib_FIND_MODULES("hand_mocap;kinesthetic_hand_mocap;openvr")
+CRSeedLib_FIND_MODULES("hand_mocap;kinesthetic_hand_mocap;leapmotion;openvr")
 
 # ==================================================================================================
 
@@ -64,6 +64,7 @@ target_link_libraries(${PROJECT_NAME}
 	fmt::fmt-header-only spdlog::spdlog
     imgui::imgui
 
+	crmodule::leapmotion
 	crmodule::hand_mocap
 	crmodule::kinesthetic_hand_mocap
 	crmodule::openvr
