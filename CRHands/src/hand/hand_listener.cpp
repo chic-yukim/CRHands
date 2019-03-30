@@ -63,16 +63,16 @@ bool HandManager::object_collision_event(const std::shared_ptr<crsf::TCRModel>& 
 
 		auto physics_manager = crsf::TPhysicsManager::GetInstance();
 
-		auto lin_vel = physics_manager->GetLinearVelocity(my_model);
+		auto lin_vel = physics_manager->GetLinearVelocity(my_model.get());
 		auto cur_lin_vel = lin_vel / 100.0;
-		physics_manager->SetLinearVelocity(my_model, cur_lin_vel);
+		physics_manager->SetLinearVelocity(my_model.get(), cur_lin_vel);
 
-		auto ang_vel = physics_manager->GetAngularVelocity(my_model);
+		auto ang_vel = physics_manager->GetAngularVelocity(my_model.get());
 		auto cur_ang_vel = ang_vel / 100.0;
-		physics_manager->SetAngularVelocity(my_model, cur_ang_vel);
+		physics_manager->SetAngularVelocity(my_model.get(), cur_ang_vel);
 
-		physics_manager->SetDamping(my_model, 100.0, 100.0);
-		physics_manager->ApplyImpulse(my_model, LVecBase3(0), LVecBase3(0));
+		physics_manager->SetDamping(my_model.get(), 100.0, 100.0);
+		physics_manager->ApplyImpulse(my_model.get(), LVecBase3(0), LVecBase3(0));
 	}
 
 	return false;
@@ -82,7 +82,7 @@ bool HandManager::object_separation_event(const std::shared_ptr<crsf::TCRModel>&
 {
 	// if my model is separated from physics interactor,
 	// set damping to initial state (damping have similar effect to air resistence)
-	crsf::TPhysicsManager::GetInstance()->SetDamping(my_model, 0, 0);
+	crsf::TPhysicsManager::GetInstance()->SetDamping(my_model.get(), 0, 0);
 	return false;
 }
 

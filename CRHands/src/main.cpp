@@ -96,10 +96,10 @@ void CRHands::setup_event()
 		auto sub_group_box_1 = dynamic_pointer_cast<crsf::TCRModel>(jewelry_->GetChild(1)->GetChild(0)->shared_from_this());
 		sub_group_box_0->SetPosition(0, 0, -0.0095);
 		sub_group_box_1->SetPosition(0, 0, 0.0095);
-		physics_manager_->SetLinearVelocity(sub_group_box_0, LVecBase3(0));
-		physics_manager_->SetAngularVelocity(sub_group_box_0, LVecBase3(0));
-		physics_manager_->SetLinearVelocity(sub_group_box_1, LVecBase3(0));
-		physics_manager_->SetAngularVelocity(sub_group_box_1, LVecBase3(0));
+		physics_manager_->SetLinearVelocity(sub_group_box_0.get(), LVecBase3(0));
+		physics_manager_->SetAngularVelocity(sub_group_box_0.get(), LVecBase3(0));
+		physics_manager_->SetLinearVelocity(sub_group_box_1.get(), LVecBase3(0));
+		physics_manager_->SetAngularVelocity(sub_group_box_1.get(), LVecBase3(0));
 
 		jewelry_->set_hinge_rotation(45);
 	});
