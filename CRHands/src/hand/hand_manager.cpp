@@ -6,7 +6,7 @@
 
 #include "hand_manager.hpp"
 
-#include <spdlog/spdlog.h>
+#include <spdlog/logger.h>
 
 #include <render_pipeline/rppanda/showbase/showbase.hpp>
 #include <render_pipeline/rpcore/globals.hpp>

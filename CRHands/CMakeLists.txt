@@ -51,6 +51,9 @@ endif()
 
 target_compile_definitions(${PROJECT_NAME}
     PRIVATE CRMODULE_ID_STRING="${CRMODULE_ID}"
+
+    # Visual Studio 2017 15.8 fixes align bug, which needs macro definition:
+    $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<VERSION_GREATER_EQUAL:${CMAKE_CXX_COMPILER_VERSION},19.15>>:_ENABLE_EXTENDED_ALIGNED_STORAGE=1>
 )
 
 target_include_directories(${PROJECT_NAME}

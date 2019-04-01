@@ -304,7 +304,7 @@ bool HandManager::grouped_object_update_event(const std::shared_ptr<crsf::TCRMod
 {
 	auto world = crsf::TGraphicRenderEngine::GetInstance()->GetWorld();
 
-	auto grouped_object_base = std::dynamic_pointer_cast<crsf::TGroupedObjectsBase>(my_model);
+	auto grouped_object_base = dynamic_cast<crsf::TGroupedObjectsBase*>(my_model.get());
 
 	if (!grouped_object_base)
 	{
@@ -313,17 +313,17 @@ bool HandManager::grouped_object_update_event(const std::shared_ptr<crsf::TCRMod
 	}
 
 	// first, check each object's contacted state
-	std::vector<shared_ptr<crsf::TCRModel>> contacted_children;
+	std::vector<crsf::TCRModel*> contacted_children;
 
 	for (int i = 0; i < grouped_object_base->GetChildren().size(); i++)
 	{
-		auto sub_group = std::dynamic_pointer_cast<crsf::TGroupedObjects>(grouped_object_base->GetChild(i)->shared_from_this());
+		auto sub_group = dynamic_cast<crsf::TGroupedObjects*>(grouped_object_base->GetChild(i));
 
 		if (sub_group)
 		{
 			for (int j = 0; j < sub_group->GetChildren().size(); j++)
 			{
-				auto child_model = std::dynamic_pointer_cast<crsf::TCRModel>(sub_group->GetChild(j)->shared_from_this());
+				auto child_model = dynamic_cast<crsf::TCRModel*>(sub_group->GetChild(j));
 
 				if (!child_model)
 					continue;
@@ -339,7 +339,7 @@ bool HandManager::grouped_object_update_event(const std::shared_ptr<crsf::TCRMod
 	if (grouped_object_base->is_multi_user_connect)
 		number_of_hand = 4;
 
-	std::vector<shared_ptr<crsf::TCRModel>> *contacted_hand = new std::vector<shared_ptr<crsf::TCRModel>>[number_of_hand];
+	std::vector<crsf::TCRModel*> *contacted_hand = new std::vector<crsf::TCRModel*>[number_of_hand];
 
 	for (int i = 0; i < contacted_children.size(); i++)
 	{
