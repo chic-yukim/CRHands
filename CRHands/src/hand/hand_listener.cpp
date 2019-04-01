@@ -170,8 +170,8 @@ bool HandManager::object_update_event(const std::shared_ptr<crsf::TCRModel>& my_
 	// test grasp kinematic feasibility
 	LMatrix4f hand_to_world;
 	int contacted_interactor_size = current_contacted_physics_interactor.size();
-	std::shared_ptr<crsf::THandPhysicsInteractor> intr1;
-	std::shared_ptr<crsf::THandPhysicsInteractor> intr2;
+	crsf::THandPhysicsInteractor* intr1;
+	crsf::THandPhysicsInteractor* intr2;
 	LVecBase3 dir1, dir2;
 	int joint1, joint2;
 	for (int i = 0; i < contacted_interactor_size; i++)
