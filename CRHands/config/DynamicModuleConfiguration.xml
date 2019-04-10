@@ -30,12 +30,13 @@
 	</kinesthetic_hand_mocap>
     <CRHands>
         <subsystem>
-			<leap>true</leap>
+			<leap>false</leap>
 			<handmocap>false</handmocap>
 			<handmocap_position>false</handmocap_position>
 			<handmocap_scale>true</handmocap_scale>
-			<unistmocap>false</unistmocap>
+			<unistmocap>true</unistmocap>
 			<unistmocap_mode>left</unistmocap_mode>
+			<unistmocap_scale>true</unistmocap_scale>
         </subsystem>
 		<tracker_serial>
 			<!-- 8 mech : LHR-15BB62C0 -->
@@ -50,7 +51,7 @@
 				<ground>true</ground>
 				<table>true</table>
 				<cubes>false</cubes>
-				<jewelry>true</jewelry>
+				<jewelry>false</jewelry>
 				<twisty_puzzle>false</twisty_puzzle>
 			</create>
 			<table>
