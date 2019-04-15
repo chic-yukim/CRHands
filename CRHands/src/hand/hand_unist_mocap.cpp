@@ -199,11 +199,11 @@ void HandManager::render_unist_mocap(crsf::TAvatarMemoryObject *amo)
 				}
 				else if (i == 1) // index
 				{
-					pip *= 1.2f;
+					pip *= 1.0f;
 				}
 				else if (i == 2) // middle
 				{
-					pip *= 1.2f;
+					pip *= 1.0f;
 				}
 
 				// calculate quaternion for hand model
@@ -234,11 +234,11 @@ void HandManager::render_unist_mocap(crsf::TAvatarMemoryObject *amo)
 				}
 				else if (i == 1) // index
 				{
-					dip *= 1.2f;
+					dip *= 1.0f;
 				}
 				else if (i == 2) // middle
 				{
-					dip *= 1.2f;
+					dip *= 1.0f;
 				}
 
 				// calculate quaternion for hand model

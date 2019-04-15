@@ -28,12 +28,12 @@
 	</kinesthetic_hand_mocap>
     <CRHands>
         <subsystem>
-			<leap>true</leap>
+			<leap>false</leap>
 			<handmocap>false</handmocap>
 			<handmocap_position>false</handmocap_position>
-			<handmocap_scale>true</handmocap_scale>
-			<unistmocap>false</unistmocap>
-			<unistmocap_mode>left</unistmocap_mode>
+			<handmocap_scale>false</handmocap_scale>
+			<unistmocap>true</unistmocap>
+			<unistmocap_mode>right</unistmocap_mode>
         </subsystem>
 		<tracker_serial>
 			<!-- 8 mech : LHR-15BB62C0 -->

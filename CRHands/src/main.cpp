@@ -59,6 +59,10 @@ void CRHands::OnStart(void)
 	setup_hand();
 	setup_scene();
 
+
+	std::cout << std::endl << " On Start! " << std::endl << std::endl;
+	std::cout << std::endl << " On Start! " << std::endl << std::endl;
+
     main_gui_ = std::make_unique<MainGUI>(*this);
 
 	/*do_method_later(1.0f, [this](rppanda::FunctionalTask* task) {
