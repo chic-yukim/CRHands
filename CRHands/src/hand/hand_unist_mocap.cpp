@@ -255,6 +255,79 @@ void HandManager::render_unist_mocap(crsf::TAvatarMemoryObject *amo)
 					model_index = crsf::RIGHT__THUMB_4 + i * 4;
 				hand_->GetJointData(model_index)->Get3DModel()->SetHPR(hpr);
 			}
+
+			// do hand model scaling using input data
+			if (props_.get("subsystem.unistmocap_scale", false))
+			{
+				// get finger length
+				float offset = hand_mocap_data_[23 + i] / 1000.0f;
+				float dist[3];
+
+				if (i == 0) // thumb
+				{
+					/*std::cout << offset << std::endl;
+					offset *= 0.66;
+					dist[0] = offset / 2 * 5;
+					dist[1] = offset / 2 * 3;
+					dist[2] = offset;*/
+
+					dist[0] = offset * 0.5;
+					dist[1] = offset * 0.3;
+					dist[2] = offset * 0.2;
+				}
+				else
+				{
+					dist[0] = offset * 0.5;
+					dist[1] = offset * 0.3;
+					dist[2] = offset * 0.2;
+				}
+
+				// do scaling following hand model hierarchy
+				int h;
+				if (unist_mocap_mode_ == "left")
+					h = 0;
+				else if (unist_mocap_mode_ == "right")
+					h = 1;
+				int f = i;
+				for (int j = 0; j < 3; j++)
+				{
+					int index = 1 + (h * 22) + (f * 4) + j;
+
+					LVecBase3 origin_scale;
+					if (j == 0) // 1st joint = proximal phalanges
+						origin_scale = hand_->GetJointData(index)->Get3DModelStandardPoseScale();
+					else
+						origin_scale = hand_->GetJointData(index)->Get3DModel()->GetScale();
+					hand_->GetJointData(index)->SetSensorOffset(dist[j]);
+					float modified_offset_ratio = hand_->GetJointData(index)->GetScalingRatio_Offset();
+					//std::cout << "index[" << index << "]: " << modified_offset_ratio << std::endl;
+
+					LVecBase3 modified_scale = LVecBase3(origin_scale[0] * modified_offset_ratio,
+						origin_scale[1],
+						origin_scale[2]);
+					hand_->GetJointData(index)->Get3DModel()->SetScale(modified_scale);
+
+					if (f == 2) // in middle case, ring and pinky follows middle finger's scale 
+					{
+						hand_->GetJointData(index + 4)->Get3DModel()->SetScale(modified_scale);
+						hand_->GetJointData(index + 8)->Get3DModel()->SetScale(modified_scale);
+					}
+
+					// hierarchy tree scaling (local scale balancing)
+					if (j != 2)
+					{
+						LVecBase3 nextJoint_scale = hand_->GetJointData(index + 1)->Get3DModelStandardPoseScale();
+						nextJoint_scale[0] *= 1.0f / modified_offset_ratio;
+						hand_->GetJointData(index + 1)->Get3DModel()->SetScale(nextJoint_scale);
+
+						if (f == 2) // in middle case, ring and pinky follows middle finger's scale 
+						{
+							hand_->GetJointData(index + 1 + 4)->Get3DModel()->SetScale(nextJoint_scale);
+							hand_->GetJointData(index + 1 + 8)->Get3DModel()->SetScale(nextJoint_scale);
+						}
+					}
+				}
+			}
 		}
 	}
 }
