@@ -10,6 +10,8 @@
 
 #include <render_pipeline/rppanda/showbase/showbase.hpp>
 #include <render_pipeline/rpcore/globals.hpp>
+#include <render_pipeline/rpcore/render_pipeline.hpp>
+#include <render_pipeline/rpcore/pluginbase/manager.hpp>
 
 #include <crsf/CoexistenceInterface/TDynamicStageMemory.h>
 #include <crsf/CREngine/TDynamicModuleManager.h>
@@ -50,93 +52,52 @@ extern spdlog::logger* global_logger;
 
 HandManager::HandManager(MainApp& app, const boost::property_tree::ptree& props) : app_(app), props_(props)
 {
+    for (auto&& index: tracker_indices_)
+        index = -1;
+
     last_hand_mocap_vibrations_[Hand_MoCAPInterface::HAND_LEFT] = Hand_MoCAPInterface::FINGER_NONE;
     last_hand_mocap_vibrations_[Hand_MoCAPInterface::HAND_RIGHT] = Hand_MoCAPInterface::FINGER_NONE;
 
+    find_trackers();
 	setup_hand();
-	get_open_vr_module_data();
 	setup_hand_event();
 }
 
 HandManager::~HandManager() = default;
 
-void HandManager::get_open_vr_module_data()
+void HandManager::find_trackers()
 {
-	// set openVR module instance
-	auto m = crsf::TDynamicModuleManager::GetInstance()->GetModuleInstance("openvr");
-	if (!m)
-		return;
-	module_open_vr_ = std::dynamic_pointer_cast<OpenVRModule>(m);
+    auto plugin_manager = app_.rendering_engine_->GetRenderPipeline()->get_plugin_mgr();
+    if (!plugin_manager->is_plugin_enabled("openvr"))
+        return;
 
-	if (props_.get("subsystem.handmocap", false))
-	{
-		// Set tracker serial number
-		left_wrist_tracker_serial_ = props_.get("tracker_serial.l_wrist", std::string(""));
-		right_wrist_tracker_serial_ = props_.get("tracker_serial.r_wrist", std::string(""));
+    // reset
+    for (auto&& index: tracker_indices_)
+        index = -1;
 
-		// Find tracker
-		int tracker_count = 0;
+    auto openvr_plugin = static_cast<rpplugins::OpenVRPlugin*>(plugin_manager->get_instance("openvr")->downcast());
+    for (int k = vr::k_unTrackedDeviceIndex_Hmd + 1; k < vr::k_unMaxTrackedDeviceCount; ++k)
+    {
+        if (!openvr_plugin->get_vr_system()->IsTrackedDeviceConnected(k))
+            continue;
 
-		for (int k = 0, k_end = module_open_vr_->GetMaximumDeviceCount(); k < k_end; ++k)
-		{
-			if (module_open_vr_->GetOpenVRPlugin()->is_tracked_device_connected(k))
-			{
-				std::string serial_number;
-				module_open_vr_->GetOpenVRPlugin()->get_tracked_device_property(serial_number, k, vr::Prop_SerialNumber_String);
+        switch (openvr_plugin->get_tracked_device_class(k))
+        {
+        case vr::TrackedDeviceClass_GenericTracker:
+            if (tracker_indices_[HAND_INDEX_LEFT] == -1)
+                tracker_indices_[HAND_INDEX_LEFT] = k;
+            else if (tracker_indices_[HAND_INDEX_RIGHT] == -1)
+                tracker_indices_[HAND_INDEX_RIGHT] = k;
+            break;
+        default:
+            break;
+        }
+    }
+}
 
-				if (serial_number == left_wrist_tracker_serial_
-					&& (hand_mocap_mode_ == BOTH || hand_mocap_mode_ == LEFT))
-				{
-					tracker_index_left_ = k;
-					tracker_count++;
-				}
-				if (serial_number == right_wrist_tracker_serial_
-					&& (hand_mocap_mode_ == BOTH || hand_mocap_mode_ == RIGHT))
-				{
-					tracker_index_right_ = k;
-					tracker_count++;
-				}
-
-				if (tracker_count >= 2)
-					break;
-			}
-		}
-	}
-
-	if (props_.get("subsystem.unistmocap", false))
-	{
-		// Set tracker serial number
-		left_wrist_tracker_serial_ = props_.get("tracker_serial.l_wrist", std::string(""));
-		right_wrist_tracker_serial_ = props_.get("tracker_serial.r_wrist", std::string(""));
-
-		// Find tracker
-		int tracker_count = 0;
-
-		for (int k = 0, k_end = module_open_vr_->GetMaximumDeviceCount(); k < k_end; ++k)
-		{
-			if (module_open_vr_->GetOpenVRPlugin()->is_tracked_device_connected(k))
-			{
-				std::string serial_number;
-				module_open_vr_->GetOpenVRPlugin()->get_tracked_device_property(serial_number, k, vr::Prop_SerialNumber_String);
-
-				if (serial_number == left_wrist_tracker_serial_
-					&& unist_mocap_mode_ == "left")
-				{
-					tracker_index_left_ = k;
-					tracker_count++;
-				}
-				if (serial_number == right_wrist_tracker_serial_
-					&& unist_mocap_mode_ == "right")
-				{
-					tracker_index_right_ = k;
-					tracker_count++;
-				}
-
-				if (tracker_count >= 2)
-					break;
-			}
-		}
-	}
+void HandManager::swap_trackers()
+{
+    std::swap(tracker_indices_[0], tracker_indices_[1]);
 }
 
 void HandManager::setup_hand_event(void)
@@ -258,20 +219,27 @@ void HandManager::setup_hand(void)
 
 
 	// init CHIC mocap setting
-	if (props_.get("subsystem.handmocap", false))
-	{
-		// get hand mocap module interface instance
-		interface_hand_mocap_ = dynamic_cast<Hand_MoCAPInterface*>(crsf::TInterfaceManager::GetInstance()->GetInputInterface("Hand_MoCAP"));
+    if (props_.get("subsystem.handmocap", false))
+    {
+        // get hand mocap module interface instance
+        interface_hand_mocap_ = dynamic_cast<Hand_MoCAPInterface*>(crsf::TInterfaceManager::GetInstance()->GetInputInterface("Hand_MoCAP"));
 
-		// set hand mocap mode
-		std::string mode = interface_hand_mocap_->GetMoCAPMode();
-		if (mode == "both")
-			hand_mocap_mode_ = BOTH;
-		else if (mode == "left")
-			hand_mocap_mode_ = LEFT;
-		else if (mode == "right")
-			hand_mocap_mode_ = RIGHT;
-	}
+        // set hand mocap mode
+        std::string mode = interface_hand_mocap_->GetMoCAPMode();
+        if (mode == "both")
+        {
+            hand_mocap_mode_ = HAND_MOCAP_MODE_BOTH;
+        }
+        else if (mode == "left")
+        {
+            hand_mocap_mode_ = HAND_MOCAP_MODE_LEFT;
+        }
+        else if (mode == "right")
+        {
+            hand_mocap_mode_ = HAND_MOCAP_MODE_RIGHT;
+            swap_trackers();
+        }
+    }
 
 
 

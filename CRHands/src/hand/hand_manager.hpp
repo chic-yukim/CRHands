@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <array>
 #include <memory>
 
 #include <util/math.hpp>
@@ -33,13 +34,29 @@ class Kinesthetic_HandMoCAPInterface;
 class HandManager : public rppanda::DirectObject
 {
 public:
-	HandManager(MainApp& app, const boost::property_tree::ptree& props);
-	virtual ~HandManager();
+    enum HandIndex
+    {
+        HAND_INDEX_LEFT = 0,
+        HAND_INDEX_RIGHT = 1,
+        HAND_INDEX_COUNT = 2,
+    };
 
-	// hand
-	crsf::TCRHand* get_hand() const;
-	crsf::TWorldObject* get_hand_object() const;
-	crsf::TCharacter* get_hand_character() const;
+    enum HandMoCAPMode
+    {
+        HAND_MOCAP_MODE_NONE = 0,
+        HAND_MOCAP_MODE_LEFT = 1,
+        HAND_MOCAP_MODE_RIGHT = 2,
+        HAND_MOCAP_MODE_BOTH = HAND_MOCAP_MODE_LEFT | HAND_MOCAP_MODE_RIGHT,
+    };
+
+public:
+    HandManager(MainApp& app, const boost::property_tree::ptree& props);
+    virtual ~HandManager();
+
+    // hand
+    crsf::TCRHand* get_hand() const;
+    crsf::TWorldObject* get_hand_object() const;
+    crsf::TCharacter* get_hand_character() const;
 
 	void setup_hand(void);
 	void setup_hand_event(void);
@@ -55,7 +72,8 @@ public:
 	LQuaternionf rotate_unist_to_crsf(const LQuaternionf& quat);
 
 	// VIVE
-	void get_open_vr_module_data();
+	void find_trackers();
+    void swap_trackers();
 
 	// listener
 	bool interactor_collision_event(const std::shared_ptr<crsf::TCRModel>& my_model, const std::shared_ptr<crsf::TCRModel>& evented_model);
@@ -68,6 +86,8 @@ public:
 	bool grouped_object_update_event(const std::shared_ptr<crsf::TCRModel>& my_model);
 
 private:
+    void render_hand_mocap_local(crsf::TCRHand* hand, crsf::TAvatarMemoryObject* amo, int hand_side);
+
 	MainApp& app_;
 
 	const boost::property_tree::ptree& props_;
@@ -90,11 +110,7 @@ private:
 
 	bool is_hand_mocap_calibration_ = false;
 
-	enum e_hand_mocap_mode_
-	{
-		BOTH, LEFT, RIGHT
-	};
-	e_hand_mocap_mode_ hand_mocap_mode_;
+    HandMoCAPMode hand_mocap_mode_ = HAND_MOCAP_MODE_NONE;
 
 	unsigned int last_hand_mocap_vibrations_[2];
 
@@ -114,13 +130,7 @@ private:
 	std::string left_wrist_tracker_serial_;
 	std::string right_wrist_tracker_serial_;
 
-	int tracker_index_left_ = -1;
-	int tracker_index_right_ = -1;
-
-	LVecBase3 trakcer_pos_;
-	LQuaternionf tracker_quat_;
-	LVecBase3 trakcers_pos_[2];
-	LQuaternionf trackers_quat_[2];
+	std::array<int, 2> tracker_indices_;
 
 	// physics particle
 	float particle_radius_ = 0.0025f;

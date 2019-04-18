@@ -35,19 +35,24 @@ void HandManager::render_unist_mocap(crsf::TAvatarMemoryObject *amo)
 {
 	crsf::TWorld* virtual_world = crsf::TGraphicRenderEngine::GetInstance()->GetWorld();
 
+    int tracker_index[HAND_INDEX_COUNT];
+
+    tracker_index[HAND_INDEX_LEFT] = tracker_indices_[HAND_INDEX_LEFT];
+    tracker_index[HAND_INDEX_RIGHT] = tracker_indices_[HAND_INDEX_RIGHT];
+
 	// set wrist pose using tracker pose
 	if (module_open_vr_)
 	{
 		if (unist_mocap_mode_ == "left")
 		{
-			auto tracker_pos = module_open_vr_->GetDevicePosition(tracker_index_left_);
-			auto tracker_quat = module_open_vr_->GetDeviceOrientation(tracker_index_left_);
+			auto tracker_pos = module_open_vr_->GetDevicePosition(tracker_index[HAND_INDEX_LEFT]);
+			auto tracker_quat = module_open_vr_->GetDeviceOrientation(tracker_index[HAND_INDEX_LEFT]);
 
 			// if tracker is not activated,
 			// find tracker
 			if (tracker_pos == LVecBase3(0))
 			{
-				get_open_vr_module_data();
+                find_trackers();
 			}
 
 			LQuaternionf a;
@@ -63,14 +68,14 @@ void HandManager::render_unist_mocap(crsf::TAvatarMemoryObject *amo)
 		}
 		else if (unist_mocap_mode_ == "right")
 		{
-			auto tracker_pos = module_open_vr_->GetDevicePosition(tracker_index_right_);
-			auto tracker_quat = module_open_vr_->GetDeviceOrientation(tracker_index_right_);
+			auto tracker_pos = module_open_vr_->GetDevicePosition(tracker_index[HAND_INDEX_RIGHT]);
+			auto tracker_quat = module_open_vr_->GetDeviceOrientation(tracker_index[HAND_INDEX_RIGHT]);
 
 			// if tracker is not activated,
 			// find tracker
 			if (tracker_pos == LVecBase3(0))
 			{
-				get_open_vr_module_data();
+				find_trackers();
 			}
 
 			LQuaternionf a;
