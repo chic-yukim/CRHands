@@ -10,8 +10,12 @@ set(module_headers
 )
 
 set(source_src
-    "${PROJECT_SOURCE_DIR}/src/main.hpp"
+    "${PROJECT_SOURCE_DIR}/src/local_user.cpp"
+    "${PROJECT_SOURCE_DIR}/src/local_user.hpp"
     "${PROJECT_SOURCE_DIR}/src/main.cpp"
+    "${PROJECT_SOURCE_DIR}/src/main.hpp"
+    "${PROJECT_SOURCE_DIR}/src/user.cpp"
+    "${PROJECT_SOURCE_DIR}/src/user.hpp"
 )
 
 set(source_main_gui
@@ -21,6 +25,8 @@ set(source_main_gui
 )
 
 set(source_hand
+    "${PROJECT_SOURCE_DIR}/src/hand/hand.cpp"
+    "${PROJECT_SOURCE_DIR}/src/hand/hand.hpp"
     "${PROJECT_SOURCE_DIR}/src/hand/hand_manager.hpp"
     "${PROJECT_SOURCE_DIR}/src/hand/hand_manager.cpp"
     "${PROJECT_SOURCE_DIR}/src/hand/hand_leap.cpp"

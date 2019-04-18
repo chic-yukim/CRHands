@@ -76,8 +76,6 @@ public:
     void swap_trackers();
 
 	// listener
-	bool interactor_collision_event(const std::shared_ptr<crsf::TCRModel>& my_model, const std::shared_ptr<crsf::TCRModel>& evented_model);
-
 	bool object_collision_event(const std::shared_ptr<crsf::TCRModel>& my_model, const std::shared_ptr<crsf::TCRModel>& evented_model);
 	bool object_separation_event(const std::shared_ptr<crsf::TCRModel>& my_model, const std::shared_ptr<crsf::TCRModel>& evented_model);
 	bool object_update_event(const std::shared_ptr<crsf::TCRModel>& my_model);

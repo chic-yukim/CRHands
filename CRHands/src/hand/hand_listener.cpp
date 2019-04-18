@@ -29,27 +29,6 @@
 
 extern spdlog::logger* global_logger;
 
-bool HandManager::interactor_collision_event(const std::shared_ptr<crsf::TCRModel>& my_model, const std::shared_ptr<crsf::TCRModel>& evented_model)
-{
-    // if contacted model is not interactable, return
-    if (evented_model->GetPhysicsModel()->GetIsHandInteractable() == false || !hand_)
-    {
-        return false;
-    }
-
-    // get contact information
-    crsf::TContactInfo* my_contact_info = my_model->GetPhysicsModel()->GetContactInfo();
-    LVecBase3 contact_position = my_contact_info->GetPositionWorldOnA();
-    LVecBase3 direction = my_contact_info->GetNormalWorldOnB();
-
-    // set penetration direction on physics interactor
-    auto my_physics_interactor = hand_->FindPhysicsInteractor(my_model);
-    my_physics_interactor->SetPenetrationDirection(direction);
-    my_physics_interactor->SetPenetrationDirection(my_physics_interactor->GetPenetrationDirection().normalized());
-
-    return false;
-}
-
 bool HandManager::object_collision_event(const std::shared_ptr<crsf::TCRModel>& my_model, const std::shared_ptr<crsf::TCRModel>& evented_model)
 {
     // if my model collided with physics interactor,

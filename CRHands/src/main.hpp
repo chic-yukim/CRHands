@@ -4,16 +4,18 @@
 #include <crsf/CRAPI/TDynamicModuleInterface.h>
 
 namespace rpcore {
-	class RenderPipeline;
+class RenderPipeline;
 }
 
 namespace crsf {
-	class TGraphicRenderEngine;
-	class TPhysicsManager;
-	class TCube;
-	class TWorldObject;
+class TGraphicRenderEngine;
+class TPhysicsManager;
+class TCube;
+class TWorldObject;
+class TDynamicStageMemory;
 }
 
+class User;
 class HandManager;
 class Jewelry;
 
@@ -43,15 +45,17 @@ public:
 private:
     friend class MainGUI;
 
-	crsf::TGraphicRenderEngine* rendering_engine_;
-	rpcore::RenderPipeline* pipeline_;
+    crsf::TGraphicRenderEngine* rendering_engine_;
+    rpcore::RenderPipeline* pipeline_;
+    crsf::TDynamicStageMemory* dsm_;
+    crsf::TPhysicsManager* physics_manager_ = nullptr;
 
     std::unique_ptr<MainGUI> main_gui_;
 
-	crsf::TPhysicsManager* physics_manager_;
-
 	friend class HandManager;
 	std::unique_ptr<HandManager> hand_manager_;
+
+    std::unique_ptr<User> user_;
 
 	// [OBJECTS]
 	// base object

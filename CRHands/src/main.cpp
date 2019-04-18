@@ -9,12 +9,17 @@
 
 #include <render_pipeline/rpcore/render_pipeline.hpp>
 
+#include <crsf/CoexistenceInterface/TDynamicStageMemory.h>
 #include <crsf/RenderingEngine/TGraphicRenderEngine.h>
 #include <crsf/CRModel/TWorld.h>
+#include <crsf/CRModel/TCRHand.h>
+#include <crsf/System/TCRProperty.h>
 
 #include <crsf/CREngine/TPhysicsManager.h>
 
+#include "hand/hand.hpp"
 #include "main_gui/main_gui.hpp"
+#include "local_user.hpp"
 
 CRSEEDLIB_MODULE_CREATOR(MainApp);
 
@@ -23,7 +28,11 @@ spdlog::logger* global_logger = nullptr;
 //////////////////////////////////////////////////////////////////////////
 MainApp::MainApp(void) : crsf::TDynamicModuleInterface(CRMODULE_ID_STRING)
 {
-	global_logger = m_logger.get();
+    global_logger = m_logger.get();
+
+    rendering_engine_ = crsf::TGraphicRenderEngine::GetInstance();
+    pipeline_ = rendering_engine_->GetRenderPipeline();
+    dsm_ = crsf::TDynamicStageMemory::GetInstance();
 
 	setup_physics();
 }
@@ -32,9 +41,6 @@ MainApp::~MainApp() = default;
 
 void MainApp::OnLoad(void)
 {
-	rendering_engine_ = crsf::TGraphicRenderEngine::GetInstance();
-	pipeline_ = rendering_engine_->GetRenderPipeline();
-
 	rendering_engine_->SetWindowTitle(CRMODULE_ID_STRING);
 	/*if (!crsf::TDynamicModuleManager::GetInstance()->IsModuleEnabled("openvr"))
 	{
@@ -55,6 +61,8 @@ void MainApp::OnLoad(void)
 void MainApp::OnStart(void)
 {
 	srand((unsigned int)time(NULL));
+
+    user_ = std::make_unique<LocalUser>();
 
 	setup_event();
 	setup_hand();
@@ -77,6 +85,8 @@ void MainApp::OnExit(void)
 	physics_manager_->Exit();
 
 	hand_manager_.reset();
+
+    user_.reset();
 }
 
 void MainApp::setup_event()
@@ -115,6 +125,32 @@ void MainApp::setup_physics()
 
 void MainApp::setup_hand()
 {
+    auto hand = user_->make_hand();
+    auto crhand = hand->get_hand();
+
+    // update hand property
+    auto hand_prop = crhand->GetHandProperty();
+    float leap_local_translation_x, leap_local_translation_y, leap_local_translation_z;
+    // VR mode - leap local translation is 'HMD-to-LEAP'
+    if (crsf::TDynamicModuleManager::GetInstance()->IsModuleEnabled("openvr"))
+    {
+        leap_local_translation_x = m_property.get("hand.HMD_to_LEAP_x", 0.0f);
+        leap_local_translation_y = m_property.get("hand.HMD_to_LEAP_y", 0.0f);
+        leap_local_translation_z = m_property.get("hand.HMD_to_LEAP_z", 0.0f);
+    }
+    else // mono mode - leap local translation is 'zero-to-LEAP'
+    {
+        leap_local_translation_x = m_property.get("hand.zero_to_LEAP_x", 0.0f);
+        leap_local_translation_y = m_property.get("hand.zero_to_LEAP_y", 0.0f);
+        leap_local_translation_z = m_property.get("hand.zero_to_LEAP_z", 0.0f);
+    }
+    hand_prop.m_vec3ZeroToSensor = LVecBase3(leap_local_translation_x, leap_local_translation_y, leap_local_translation_z);
+    crhand->SetHandProperty(hand_prop);
+
+    auto node_hmd = crsf::CreateObject<crsf::TWorldObject>("HMD");
+    rendering_engine_->GetWorld()->AddWorldObject(node_hmd);
+    node_hmd->AddWorldObject(hand->get_object());
+
 	hand_manager_ = std::make_unique<HandManager>(*this, m_property);
 }
 
