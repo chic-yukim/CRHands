@@ -12,7 +12,7 @@
 #include <render_pipeline/rpcore/render_pipeline.hpp>
 #include "main.hpp"
 
-MainGUI::MainGUI(CRHands& app) : app_(app)
+MainGUI::MainGUI(MainApp& app) : app_(app)
 {
     rppanda::Messenger::get_global_instance()->send(
         "imgui-setup-context",
@@ -32,7 +32,7 @@ void MainGUI::on_imgui_new_frame()
 {
     static bool window = true;
 
-    ImGui::Begin("CRHands", &window);
+    ImGui::Begin("MainApp", &window);
 
     ui_hand_mocap();
 

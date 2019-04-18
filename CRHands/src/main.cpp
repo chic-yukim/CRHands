@@ -16,21 +16,21 @@
 
 #include "main_gui/main_gui.hpp"
 
-CRSEEDLIB_MODULE_CREATOR(CRHands);
+CRSEEDLIB_MODULE_CREATOR(MainApp);
 
 spdlog::logger* global_logger = nullptr;
 
 //////////////////////////////////////////////////////////////////////////
-CRHands::CRHands(void) : crsf::TDynamicModuleInterface(CRMODULE_ID_STRING)
+MainApp::MainApp(void) : crsf::TDynamicModuleInterface(CRMODULE_ID_STRING)
 {
 	global_logger = m_logger.get();
 
 	setup_physics();
 }
 
-CRHands::~CRHands() = default;
+MainApp::~MainApp() = default;
 
-void CRHands::OnLoad(void)
+void MainApp::OnLoad(void)
 {
 	rendering_engine_ = crsf::TGraphicRenderEngine::GetInstance();
 	pipeline_ = rendering_engine_->GetRenderPipeline();
@@ -52,7 +52,7 @@ void CRHands::OnLoad(void)
 	rendering_engine_->ResetControllerInitial();
 }
 
-void CRHands::OnStart(void)
+void MainApp::OnStart(void)
 {
 	srand((unsigned int)time(NULL));
 
@@ -65,10 +65,10 @@ void CRHands::OnStart(void)
 	/*do_method_later(1.0f, [this](rppanda::FunctionalTask* task) {
 		physics_manager_->Start();
 		return AsyncTask::DoneStatus::DS_done;
-	}, "CRHands::start_physics");*/
+	}, "MainApp::start_physics");*/
 }
 
-void CRHands::OnExit(void)
+void MainApp::OnExit(void)
 {
     main_gui_.reset();
 
@@ -79,7 +79,7 @@ void CRHands::OnExit(void)
 	hand_manager_.reset();
 }
 
-void CRHands::setup_event()
+void MainApp::setup_event()
 {
 	accept("f1", [this](const Event*) {
 		rendering_engine_->GetRenderNode()->GetNodePath().ls();
@@ -105,7 +105,7 @@ void CRHands::setup_event()
 	});
 }
 
-void CRHands::setup_physics()
+void MainApp::setup_physics()
 {
 	physics_manager_ = crsf::TPhysicsManager::GetInstance();
 	physics_manager_->Init(crsf::EPHYX_ENGINE_BULLET);
@@ -113,12 +113,12 @@ void CRHands::setup_physics()
 	physics_manager_->SetInternalStep_FPS(60, true, false);
 }
 
-void CRHands::setup_hand()
+void MainApp::setup_hand()
 {
 	hand_manager_ = std::make_unique<HandManager>(*this, m_property);
 }
 
-void CRHands::setup_scene()
+void MainApp::setup_scene()
 {
 	if (m_property.get("object.create.ground", false))
 		setup_ground();

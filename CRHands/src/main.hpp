@@ -17,11 +17,11 @@ namespace crsf {
 class HandManager;
 class Jewelry;
 
-class CRHands: public crsf::TDynamicModuleInterface, public rppanda::DirectObject
+class MainApp: public crsf::TDynamicModuleInterface, public rppanda::DirectObject
 {
 public:
-	CRHands();
-	virtual ~CRHands();
+	MainApp();
+	virtual ~MainApp();
 
 	void OnLoad(void) override;
 	void OnStart(void) override;

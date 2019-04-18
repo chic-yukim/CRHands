@@ -23,7 +23,7 @@ namespace crsf {
 	class TCRModel;
 }
 
-class CRHands;
+class MainApp;
 
 class OpenVRModule;
 class LeapMotionInterface;
@@ -33,7 +33,7 @@ class Kinesthetic_HandMoCAPInterface;
 class HandManager : public rppanda::DirectObject
 {
 public:
-	HandManager(CRHands& app, const boost::property_tree::ptree& props);
+	HandManager(MainApp& app, const boost::property_tree::ptree& props);
 	virtual ~HandManager();
 
 	// hand
@@ -68,7 +68,7 @@ public:
 	bool grouped_object_update_event(const std::shared_ptr<crsf::TCRModel>& my_model);
 
 private:
-	CRHands& app_;
+	MainApp& app_;
 
 	const boost::property_tree::ptree& props_;
 

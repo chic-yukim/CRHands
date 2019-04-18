@@ -2,12 +2,12 @@
 
 #include <render_pipeline/rppanda/showbase/direct_object.hpp>
 
-class CRHands;
+class MainApp;
 
 class MainGUI : public rppanda::DirectObject
 {
 public:
-    MainGUI(CRHands& app);
+    MainGUI(MainApp& app);
 
     virtual ~MainGUI();
 
@@ -17,7 +17,7 @@ public:
 private:
     void on_imgui_new_frame();
 
-    CRHands& app_;
+    MainApp& app_;
 
     struct HandMocapStatus
     {

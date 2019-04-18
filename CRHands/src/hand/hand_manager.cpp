@@ -48,7 +48,7 @@
 
 extern spdlog::logger* global_logger;
 
-HandManager::HandManager(CRHands& app, const boost::property_tree::ptree& props) : app_(app), props_(props)
+HandManager::HandManager(MainApp& app, const boost::property_tree::ptree& props) : app_(app), props_(props)
 {
     last_hand_mocap_vibrations_[Hand_MoCAPInterface::HAND_LEFT] = Hand_MoCAPInterface::FINGER_NONE;
     last_hand_mocap_vibrations_[Hand_MoCAPInterface::HAND_RIGHT] = Hand_MoCAPInterface::FINGER_NONE;

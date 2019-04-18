@@ -14,7 +14,7 @@
 #include <crsf/CRModel/TCRModel.h>
 #include <crsf/CRModel/TCube.h>
 
-void CRHands::setup_cubes()
+void MainApp::setup_cubes()
 {
 	auto world = rendering_engine_->GetWorld();
 
@@ -63,7 +63,7 @@ void CRHands::setup_cubes()
 	}
 }
 
-void CRHands::reset_cubes_position()
+void MainApp::reset_cubes_position()
 {
 	float count = m_property.get("object.cubes.count", 1);
 

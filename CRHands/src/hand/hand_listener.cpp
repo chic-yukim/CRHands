@@ -6,7 +6,7 @@
 
 #include "hand_manager.hpp"
 
-#include <render_pipeline/rpcore/util/rpmaterial.hpp>
+#include <spdlog/logger.h>
 
 #include <crsf/RenderingEngine/TGraphicRenderEngine.h>
 #include <crsf/CRModel/TWorld.h>
@@ -22,9 +22,6 @@
 #include <crsf/CRModel/TGroupedObjects.h>
 #include <crsf/CRModel/TGroupedObjectsBase.h>
 
-
-#include <spdlog/spdlog.h>
-
 #include <hand_mocap_module.h>
 #include <hand_mocap_interface.h>
 
@@ -34,56 +31,56 @@ extern spdlog::logger* global_logger;
 
 bool HandManager::interactor_collision_event(const std::shared_ptr<crsf::TCRModel>& my_model, const std::shared_ptr<crsf::TCRModel>& evented_model)
 {
-	// if contacted model is not interactable, return
-	if (evented_model->GetPhysicsModel()->GetIsHandInteractable() == false || !hand_)
-	{
-		return false;
-	}
+    // if contacted model is not interactable, return
+    if (evented_model->GetPhysicsModel()->GetIsHandInteractable() == false || !hand_)
+    {
+        return false;
+    }
 
-	// get contact information
-	crsf::TContactInfo* my_contact_info = my_model->GetPhysicsModel()->GetContactInfo();
-	LVecBase3 contact_position = my_contact_info->GetPositionWorldOnA();
-	LVecBase3 direction = my_contact_info->GetNormalWorldOnB();
+    // get contact information
+    crsf::TContactInfo* my_contact_info = my_model->GetPhysicsModel()->GetContactInfo();
+    LVecBase3 contact_position = my_contact_info->GetPositionWorldOnA();
+    LVecBase3 direction = my_contact_info->GetNormalWorldOnB();
 
-	// set penetration direction on physics interactor
-	auto my_physics_interactor = hand_->FindPhysicsInteractor(my_model);
-	my_physics_interactor->SetPenetrationDirection(direction);
-	my_physics_interactor->SetPenetrationDirection(my_physics_interactor->GetPenetrationDirection().normalized());
+    // set penetration direction on physics interactor
+    auto my_physics_interactor = hand_->FindPhysicsInteractor(my_model);
+    my_physics_interactor->SetPenetrationDirection(direction);
+    my_physics_interactor->SetPenetrationDirection(my_physics_interactor->GetPenetrationDirection().normalized());
 
-	return false;
+    return false;
 }
 
 bool HandManager::object_collision_event(const std::shared_ptr<crsf::TCRModel>& my_model, const std::shared_ptr<crsf::TCRModel>& evented_model)
 {
-	// if my model collided with physics interactor,
-	// set physics parameter to relaxing state
-	if (evented_model->GetModelGroup() == crsf::EMODEL_GROUP_HANDPHYSICSINTERACTOR)
-	{
-		auto world = crsf::TGraphicRenderEngine::GetInstance()->GetWorld();
+    // if my model collided with physics interactor,
+    // set physics parameter to relaxing state
+    if (evented_model->GetModelGroup() == crsf::EMODEL_GROUP_HANDPHYSICSINTERACTOR)
+    {
+        auto world = crsf::TGraphicRenderEngine::GetInstance()->GetWorld();
 
-		auto physics_manager = crsf::TPhysicsManager::GetInstance();
+        auto physics_manager = crsf::TPhysicsManager::GetInstance();
 
-		auto lin_vel = physics_manager->GetLinearVelocity(my_model.get());
-		auto cur_lin_vel = lin_vel / 100.0;
-		physics_manager->SetLinearVelocity(my_model.get(), cur_lin_vel);
+        auto lin_vel = physics_manager->GetLinearVelocity(my_model.get());
+        auto cur_lin_vel = lin_vel / 100.0;
+        physics_manager->SetLinearVelocity(my_model.get(), cur_lin_vel);
 
-		auto ang_vel = physics_manager->GetAngularVelocity(my_model.get());
-		auto cur_ang_vel = ang_vel / 100.0;
-		physics_manager->SetAngularVelocity(my_model.get(), cur_ang_vel);
+        auto ang_vel = physics_manager->GetAngularVelocity(my_model.get());
+        auto cur_ang_vel = ang_vel / 100.0;
+        physics_manager->SetAngularVelocity(my_model.get(), cur_ang_vel);
 
-		physics_manager->SetDamping(my_model.get(), 100.0, 100.0);
-		physics_manager->ApplyImpulse(my_model.get(), LVecBase3(0), LVecBase3(0));
-	}
+        physics_manager->SetDamping(my_model.get(), 100.0, 100.0);
+        physics_manager->ApplyImpulse(my_model.get(), LVecBase3(0), LVecBase3(0));
+    }
 
-	return false;
+    return false;
 }
 
 bool HandManager::object_separation_event(const std::shared_ptr<crsf::TCRModel>& my_model, const std::shared_ptr<crsf::TCRModel>& evented_model)
 {
-	// if my model is separated from physics interactor,
-	// set damping to initial state (damping have similar effect to air resistence)
-	crsf::TPhysicsManager::GetInstance()->SetDamping(my_model.get(), 0, 0);
-	return false;
+    // if my model is separated from physics interactor,
+    // set damping to initial state (damping have similar effect to air resistence)
+    crsf::TPhysicsManager::GetInstance()->SetDamping(my_model.get(), 0, 0);
+    return false;
 }
 
 bool HandManager::object_update_event(const std::shared_ptr<crsf::TCRModel>& my_model)
@@ -93,34 +90,32 @@ bool HandManager::object_update_event(const std::shared_ptr<crsf::TCRModel>& my_
 
 	crsf::TWorld* world = crsf::TGraphicRenderEngine::GetInstance()->GetWorld();
 
-	// get contactinformation
+    // get contactinformation
 	auto my_physics_model = my_model->GetPhysicsModel();
 	auto my_model_contact_info = my_model->GetPhysicsModel()->GetContactInfo();
-	const auto& contacted_models = my_model_contact_info->GetContactedModel();
 
-	// init grasp state
+    // init grasp state
 	bool old_grasp_state = my_physics_model->GetIsGrasped();
 	my_physics_model->SetIsGrasped(false);
 
-	// current contacted physics particle
-	std::vector<std::shared_ptr<crsf::TCRModel>> current_contacted_physics_interactor;
-	current_contacted_physics_interactor.clear();
-
 	// hand mocap vibration bit mask
     Hand_MoCAPInterface::FingerMask vibration_mask[2] = { Hand_MoCAPInterface::FingerMask::FINGER_NONE, Hand_MoCAPInterface::FingerMask::FINGER_NONE };
-	
-	// traverse contacted model
-    for (const auto& contacted_model : contacted_models)
+
+    // current contacted physics particle
+    std::vector<crsf::TCRModel*> current_contacted_physics_interactor;
+
+    // traverse contacted model
+    for (const auto& contacted_model : my_model_contact_info->GetContactedModel())
     {
         if (contacted_model->GetModelGroup() == crsf::EMODEL_GROUP_HANDPHYSICSINTERACTOR)
         {
-			// set & get physics interactor information
-			current_contacted_physics_interactor.push_back(contacted_model);
+            // set & get physics interactor information
+            current_contacted_physics_interactor.push_back(contacted_model.get());
             auto intr = hand_->FindPhysicsInteractor(contacted_model);
             if (!intr)
                 return false;
             auto tag = intr->GetConnectedJointTag();
-			intr->SetIsTouched(true);
+            intr->SetIsTouched(true);
 
             // vibration bit masking
             switch (tag)

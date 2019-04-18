@@ -21,7 +21,7 @@
 
 #include <crsf/Utility/TOpenFrameworksMath.h>
 
-void CRHands::setup_jewelry()
+void MainApp::setup_jewelry()
 {
 	auto world = rendering_engine_->GetWorld();
 

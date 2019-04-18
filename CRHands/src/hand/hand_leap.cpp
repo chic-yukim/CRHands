@@ -10,6 +10,7 @@
 #include <render_pipeline/rpcore/globals.hpp>
 
 #include <crsf/CoexistenceInterface/TDynamicStageMemory.h>
+#include <crsf/CoexistenceInterface/TAvatarMemoryObject.h>
 #include <crsf/CREngine/TDynamicModuleManager.h>
 
 #include <crsf/RenderingEngine/TGraphicRenderEngine.h>
@@ -19,7 +20,6 @@
 
 #include <crsf/CRModel/TCRHand.h>
 
-#include <crsf/CoexistenceInterface/TAvatarMemoryObject.h>
 #include <crsf/System/TPose.h>
 
 void HandManager::render_hand_leap(crsf::TAvatarMemoryObject *amo)

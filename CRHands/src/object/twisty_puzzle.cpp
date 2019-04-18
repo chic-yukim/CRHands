@@ -14,7 +14,7 @@
 #include <crsf/CRModel/TCRModel.h>
 #include <crsf/CRModel/TCube.h>
 
-void CRHands::setup_twisty_puzzle()
+void MainApp::setup_twisty_puzzle()
 {
 	auto world = rendering_engine_->GetWorld();
 

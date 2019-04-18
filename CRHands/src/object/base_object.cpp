@@ -13,7 +13,7 @@
 #include <crsf/CRModel/TCube.h>
 #include <crsf/CRModel/TCompound.h>
 
-void CRHands::setup_ground()
+void MainApp::setup_ground()
 {
 	auto world = rendering_engine_->GetWorld();
 	
@@ -36,7 +36,7 @@ void CRHands::setup_ground()
 	physics_manager_->AddModel(ground_);
 }
 
-void CRHands::setup_table()
+void MainApp::setup_table()
 {
 	auto world = rendering_engine_->GetWorld();
 
