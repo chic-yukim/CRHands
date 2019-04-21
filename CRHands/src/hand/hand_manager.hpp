@@ -27,7 +27,6 @@ namespace crsf {
 class MainApp;
 
 class OpenVRModule;
-class LeapMotionInterface;
 class Hand_MoCAPInterface;
 class Kinesthetic_HandMoCAPInterface;
 
@@ -61,9 +60,6 @@ public:
 	void setup_hand(void);
 	void setup_hand_event(void);
 
-	// leap
-	void render_hand_leap(crsf::TAvatarMemoryObject *amo);
-
 	// CHIC mocap
 	void render_hand_mocap(crsf::TAvatarMemoryObject *amo);
 
@@ -96,10 +92,6 @@ private:
 	crsf::TCRHand* hand_ = nullptr;
 	crsf::TWorldObject* hand_object_ = nullptr;
 	crsf::TCharacter* hand_character_ = nullptr;
-	
-	// LEAP
-	LeapMotionInterface* interface_leap_ = nullptr;
-	std::string leap_mode_ = "HMD";
 
 	// CHIC mocap
 	Hand_MoCAPInterface* interface_hand_mocap_ = nullptr;

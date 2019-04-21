@@ -46,6 +46,7 @@
 #include <kinesthethic_hand_mocap_module.h>
 #include <kinesthethic_hand_mocap_interface.h>
 
+#include "hand/hand_leap.hpp"
 #include "hand/hand.hpp"
 #include "main.hpp"
 #include "user.hpp"
@@ -152,16 +153,6 @@ void HandManager::setup_hand(void)
 	hand_pointer_.push_back(hand_->Get3DModel_RightWrist());
 	hand_pointer_.push_back(hand_->Get3DModel_LeftWrist());
 
-	// init LEAP setting
-	if (props_.get("subsystem.leap", false))
-	{
-		interface_leap_ = dynamic_cast<LeapMotionInterface*>(crsf::TInterfaceManager::GetInstance()->GetInputInterface("LeapMotion"));
-
-		leap_mode_ = interface_leap_->GetMode();
-	}
-
-
-
 	// init CHIC mocap setting
     if (props_.get("subsystem.handmocap", false))
     {
@@ -213,11 +204,15 @@ void HandManager::setup_hand(void)
 	// set DSM for hand
 	if (props_.get("subsystem.leap", false))
 	{
-		auto amo = crsf::TDynamicStageMemory::GetInstance()->GetAvatarMemoryObjectByName("Hands");
-		crsf::TPhysicsManager::GetInstance()->AddTask([this, amo](void) {
-			render_hand_leap(amo);
-			return false;
-		}, "render_hand_leap");
+        // render my hand motion from leap module's amo
+        if (app_.dsm_->HasMemoryObject<crsf::TAvatarMemoryObject>("Hands"))
+        {
+            hand->set_render_method(app_.dsm_->GetAvatarMemoryObjectByName("Hands"), render_hand_leap_local);
+        }
+        else
+        {
+            app_.m_logger->error("Failed to get AvatarMemoryObject of leap motion.");
+        }
 	}
 	else if (props_.get("subsystem.handmocap", false))
 	{

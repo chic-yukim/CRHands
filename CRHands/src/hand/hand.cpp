@@ -1,5 +1,6 @@
 #include "hand.hpp"
 
+#include <crsf/CoexistenceInterface/TAvatarMemoryObject.h>
 #include <crsf/CRModel/TCharacter.h>
 #include <crsf/CRModel/TCRHand.h>
 #include <crsf/CRModel/THandPhysicsInteractor.h>
@@ -15,7 +16,10 @@ Hand::Hand(const crsf::TCRProperty& props, crsf::TWorldObject* hand_model) : han
     hand_connector_->Init(hand_.get());
 }
 
-Hand::~Hand() = default;
+Hand::~Hand()
+{
+    hand_connector_.reset();
+}
 
 crsf::TCharacter* Hand::get_character() const
 {
@@ -49,4 +53,20 @@ bool Hand::interactor_collision_event(const std::shared_ptr<crsf::TCRModel>& my_
     physics_particle->SetPenetrationDirection(physics_particle->GetPenetrationDirection().normalized());
 
     return false;
+}
+
+void Hand::set_avatar_memory_object(crsf::TAvatarMemoryObject* amo)
+{
+    if (amo && hand_->GetJointNumber() != amo->GetProperty().m_propAvatar.m_nJointNumber)
+        return;
+
+    hand_amo_ = amo;
+}
+
+void Hand::set_render_method(crsf::TAvatarMemoryObject* source_amo, const RenderMethodType& render_method)
+{
+    render_method_ = render_method;
+    hand_connector_->ConnectHand([this](crsf::TAvatarMemoryObject* amo) {
+        render_method_(this, amo);
+    }, source_amo);
 }

@@ -30,6 +30,7 @@ set(source_hand
     "${PROJECT_SOURCE_DIR}/src/hand/hand_manager.hpp"
     "${PROJECT_SOURCE_DIR}/src/hand/hand_manager.cpp"
     "${PROJECT_SOURCE_DIR}/src/hand/hand_leap.cpp"
+    "${PROJECT_SOURCE_DIR}/src/hand/hand_leap.hpp"
     "${PROJECT_SOURCE_DIR}/src/hand/hand_hand_mocap.cpp"
     "${PROJECT_SOURCE_DIR}/src/hand/hand_unist_mocap.cpp"
     "${PROJECT_SOURCE_DIR}/src/hand/hand_listener.cpp"
