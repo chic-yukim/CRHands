@@ -60,7 +60,9 @@
     - commode: `ble` (기본값), `serial`
     - mode: `left`, `right` 또는 `both`
     - port: `commode` 가 `serial` 일 경우에만 작동하며, `COM1` 과 같이 COM 포트 이름을 추가
-      - ![com-port-image](https://user-images.githubusercontent.com/937305/56501079-71a1f180-6548-11e9-9823-f7dba82b714d.png)
+
+      ![com-port-image](https://user-images.githubusercontent.com/937305/56501079-71a1f180-6548-11e9-9823-f7dba82b714d.png)
+
     - mech: Hand MoCAP 장비 번호
   - `subsystem.handmocap` 태그 값을 true 로 변경
 - `DeviceConfiguration.xml` 파일 설정
@@ -77,7 +79,9 @@
 - `DynamicModuleConfiguration.xml` 파일을 실험하는 기기에 맞게 수정
   - `hand_mocap.interface` 태그
     - port: `COM1` 과 같이 COM 포트 이름을 추가
-      - ![com-port-image](https://user-images.githubusercontent.com/937305/56501079-71a1f180-6548-11e9-9823-f7dba82b714d.png)
+
+      ![com-port-image](https://user-images.githubusercontent.com/937305/56501079-71a1f180-6548-11e9-9823-f7dba82b714d.png)
+      
     - version: `new` (기본값), `old`
   - `subsystem.unistmocap` 태그 값을 true 로 변경
 - `DeviceConfiguration.xml` 파일 설정
@@ -98,13 +102,20 @@
 ### 프로젝트 실행 이슈
 - SteamVR 업데이트로 인해 트래커 설정 별도 조절 필요
   1. SteamVR 에서 연결된 트래커 아이콘을 우클릭 후 Manage Vive Trackers 메뉴 클릭
-    - ![steamvr-tracker-right-click](https://user-images.githubusercontent.com/937305/56501922-9481d500-654b-11e9-8adf-8b458d803362.png)
+
+     ![steamvr-tracker-right-click](https://user-images.githubusercontent.com/937305/56501922-9481d500-654b-11e9-8adf-8b458d803362.png)
+
   2. 연결된 트래커 확인
-    - ![manage-trackers1](https://user-images.githubusercontent.com/937305/56501980-c85cfa80-654b-11e9-85e0-115d80e3de24.png)
+
+     ![manage-trackers1](https://user-images.githubusercontent.com/937305/56501980-c85cfa80-654b-11e9-85e0-115d80e3de24.png)
+
   3. Select Role 에서 Disabled 로 설정
-    - ![manage-trackers2](https://user-images.githubusercontent.com/937305/56502041-fe01e380-654b-11e9-80b2-f03f06bbf243.png)
+
+     ![manage-trackers2](https://user-images.githubusercontent.com/937305/56502041-fe01e380-654b-11e9-80b2-f03f06bbf243.png)
+
   4. 변경 완료
-    - ![manage-trackers3](https://user-images.githubusercontent.com/937305/56502090-1ffb6600-654c-11e9-9d1b-ff3fa7ae0dba.png)
+
+     ![manage-trackers3](https://user-images.githubusercontent.com/937305/56502090-1ffb6600-654c-11e9-9d1b-ff3fa7ae0dba.png)
 
   참고로, "Manage Vive Trackers" 를 클릭해도 창이 나타나지 않는 경우, Vive 를 쓴 후 VR 안에서 설정 메뉴를 통해 동일하게 변경이 가능함.
 
