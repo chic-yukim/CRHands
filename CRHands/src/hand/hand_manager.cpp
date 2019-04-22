@@ -100,7 +100,7 @@ void HandManager::find_trackers()
 
 void HandManager::swap_trackers()
 {
-    std::swap(tracker_indices_[0], tracker_indices_[1]);
+    std::swap(tracker_indices_[HAND_INDEX_LEFT], tracker_indices_[HAND_INDEX_RIGHT]);
 }
 
 void HandManager::setup_hand_event(void)
@@ -249,6 +249,9 @@ void HandManager::setup_hand(User* user)
 void HandManager::configure_hand(Hand* hand)
 {
     auto crhand = hand->get_hand();
-    crhand->SetPhysicsInteractor_KinematicObject();
-    crhand->SetPhysicsInteractor_Mass(0.0f);
+    if (app_.physics_manager_)
+    {
+        crhand->SetPhysicsInteractor_KinematicObject();
+        crhand->SetPhysicsInteractor_Mass(0.0f);
+    }
 }

@@ -10,6 +10,8 @@
 #include <render_pipeline/rpcore/pluginbase/manager.hpp>
 #include <render_pipeline/rpcore/util/primitives.hpp>
 #include <render_pipeline/rpcore/render_pipeline.hpp>
+
+#include "hand/hand_manager.hpp"
 #include "main.hpp"
 
 MainGUI::MainGUI(MainApp& app) : app_(app)
@@ -32,7 +34,10 @@ void MainGUI::on_imgui_new_frame()
 {
     static bool window = true;
 
-    ImGui::Begin("MainApp", &window);
+    ImGui::Begin("CRHands", &window);
+
+    if (ImGui::Button("Swap Trackers"))
+        app_.hand_manager_->swap_trackers();
 
     ui_hand_mocap();
 
