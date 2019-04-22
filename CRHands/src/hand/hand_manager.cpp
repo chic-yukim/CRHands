@@ -62,8 +62,8 @@ HandManager::HandManager(MainApp& app, const boost::property_tree::ptree& props)
     last_hand_mocap_vibrations_[Hand_MoCAPInterface::HAND_RIGHT] = Hand_MoCAPInterface::FINGER_NONE;
 
     find_trackers();
-	setup_hand();
-	setup_hand_event();
+    setup_hand();
+    setup_hand_event();
 }
 
 HandManager::~HandManager() = default;
@@ -105,61 +105,34 @@ void HandManager::swap_trackers()
 
 void HandManager::setup_hand_event(void)
 {
-	// calibration
-	accept("1", [this](const Event*) {
-		if (interface_hand_mocap_)
-		{
-			hand_->InitScalingParameter();
+    // calibration
+    accept("1", [this](const Event*) {
+        if (interface_hand_mocap_)
+        {
+            hand_->InitScalingParameter();
 
-			interface_hand_mocap_->FingerInit(Hand_MoCAPInterface::HAND_LEFT);
-			interface_hand_mocap_->FingerInit(Hand_MoCAPInterface::HAND_RIGHT);
+            interface_hand_mocap_->FingerInit(Hand_MoCAPInterface::HAND_LEFT);
+            interface_hand_mocap_->FingerInit(Hand_MoCAPInterface::HAND_RIGHT);
 
-			is_hand_mocap_calibration_ = true;
-		}
+            is_hand_mocap_calibration_ = true;
+        }
 
-		if (interface_unist_mocap_)
-		{
-			interface_unist_mocap_->Calibration();
-		}
-	});
-
-	// reset cubes position
-	accept("9", [this](const Event*) {
-		app_.reset_cubes_position();
-	});
+        if (interface_unist_mocap_)
+        {
+            interface_unist_mocap_->Calibration();
+        }
+    });
 }
 
 void HandManager::setup_hand(void)
 {
-	// create hand instance
-    auto hand = app_.user_->get_hand();
-	hand_ = app_.user_->get_hand()->get_hand();
-
-	// set display mode
-	//hand_object_->GetNodePath().node()->set_attrib(DepthTestAttrib::make(RenderAttrib::PandaCompareFunc::M_never));
-	//hand_->Set3DModel_Particle(LColorf(0.1, 0.9, 0.9, 1.0f), 0.5);
-	//hand_object_->GetNodePath().set_render_mode_wireframe();
-
-
-
-    // create physics interactor
-    hand->setup_physics_interactor(particle_radius_);
-
-	// attach listener function to physics interactor
-	hand_->SetPhysicsInteractor_RigidObject();
-	hand_->SetPhysicsInteractor_Mass(0.0f);
-
-	// grasp algorithm
-	hand_pointer_.push_back(hand_->Get3DModel_RightWrist());
-	hand_pointer_.push_back(hand_->Get3DModel_LeftWrist());
+    auto interface_manager = crsf::TInterfaceManager::GetInstance();
 
 	// init CHIC mocap setting
-    if (props_.get("subsystem.handmocap", false))
+    // get hand mocap module interface instance
+    interface_hand_mocap_ = dynamic_cast<Hand_MoCAPInterface*>(interface_manager->GetInputInterface("Hand_MoCAP"));
+    if (interface_hand_mocap_)
     {
-        // get hand mocap module interface instance
-        interface_hand_mocap_ = dynamic_cast<Hand_MoCAPInterface*>(crsf::TInterfaceManager::GetInstance()->GetInputInterface("Hand_MoCAP"));
-
-        // set hand mocap mode
         std::string mode = interface_hand_mocap_->GetMoCAPMode();
         if (mode == "both")
         {
@@ -176,58 +149,106 @@ void HandManager::setup_hand(void)
         }
     }
 
+    // init UNIST mocap setting
+    if (props_.get("subsystem.unistmocap", false))
+    {
+        interface_unist_mocap_ = dynamic_cast<Kinesthetic_HandMoCAPInterface*>(interface_manager->GetInputInterface("KinestheticHandMoCAP"));
 
-
-	// init UNIST mocap setting
-	if (props_.get("subsystem.unistmocap", false))
-	{
-		interface_unist_mocap_ = dynamic_cast<Kinesthetic_HandMoCAPInterface*>(crsf::TInterfaceManager::GetInstance()->GetInputInterface("KinestheticHandMoCAP"));
-
-		if (interface_unist_mocap_)
-		{
-			// version
-			if (interface_unist_mocap_->GetVersion() == "old")
-				unist_mocap_joint_number_ = 26;
-			else if (interface_unist_mocap_->GetVersion() == "new")
-				unist_mocap_joint_number_ = 28;
-
-			// mode
-			if (props_.get("subsystem.unistmocap_mode", "") == "left")
-				unist_mocap_mode_ = "left";
-			else if (props_.get("subsystem.unistmocap_mode", "") == "right")
-				unist_mocap_mode_ = "right";
-		}
-	}
-
-
-
-	// set DSM for hand
-	if (props_.get("subsystem.leap", false))
-	{
-        // render my hand motion from leap module's amo
-        if (app_.dsm_->HasMemoryObject<crsf::TAvatarMemoryObject>("Hands"))
+        if (interface_unist_mocap_)
         {
-            hand->set_render_method(app_.dsm_->GetAvatarMemoryObjectByName("Hands"), render_hand_leap_local);
+            // version
+            if (interface_unist_mocap_->GetVersion() == "old")
+                unist_mocap_joint_number_ = 26;
+            else if (interface_unist_mocap_->GetVersion() == "new")
+                unist_mocap_joint_number_ = 28;
+
+            // mode
+            if (props_.get("subsystem.unistmocap_mode", "") == "left")
+                unist_mocap_mode_ = "left";
+            else if (props_.get("subsystem.unistmocap_mode", "") == "right")
+                unist_mocap_mode_ = "right";
         }
-        else
+    }
+}
+
+void HandManager::setup_hand(User* user)
+{
+    if (!user)
+        return;
+
+    if (user->get_hand())
+        return;
+
+    // create hand instance
+    auto hand = user->make_hand();
+    auto crhand = hand->get_hand();
+    hand_ = crhand;
+
+    // update hand property
+    auto hand_prop = crhand->GetHandProperty();
+    // VR mode - leap local translation is 'HMD-to-LEAP'
+    if (crsf::TDynamicModuleManager::GetInstance()->IsModuleEnabled("openvr"))
+    {
+        hand_prop.m_vec3ZeroToSensor[0] = app_.m_property.get("hand.HMD_to_LEAP_x", 0.0f);
+        hand_prop.m_vec3ZeroToSensor[1] = app_.m_property.get("hand.HMD_to_LEAP_y", 0.0f);
+        hand_prop.m_vec3ZeroToSensor[2] = app_.m_property.get("hand.HMD_to_LEAP_z", 0.0f);
+    }
+    else // mono mode - leap local translation is 'zero-to-LEAP'
+    {
+        hand_prop.m_vec3ZeroToSensor[0] = app_.m_property.get("hand.zero_to_LEAP_x", 0.0f);
+        hand_prop.m_vec3ZeroToSensor[1] = app_.m_property.get("hand.zero_to_LEAP_y", 0.0f);
+        hand_prop.m_vec3ZeroToSensor[2] = app_.m_property.get("hand.zero_to_LEAP_z", 0.0f);
+    }
+    crhand->SetHandProperty(hand_prop);
+
+    // create physics interactor
+    if (app_.physics_manager_)
+        hand->setup_physics_interactor(particle_radius_);
+
+    // grasp algorithm
+    hand_pointer_.push_back(hand_->Get3DModel_RightWrist());
+    hand_pointer_.push_back(hand_->Get3DModel_LeftWrist());
+
+    if (user->get_system_index() == app_.dsm_->GetSystemIndex())
+    {
+        if (app_.m_property.get("subsystem.leap", false))
         {
-            app_.m_logger->error("Failed to get AvatarMemoryObject of leap motion.");
+            if (app_.dsm_->HasMemoryObject<crsf::TAvatarMemoryObject>("Hands"))
+            {
+                hand->set_render_method(app_.dsm_->GetAvatarMemoryObjectByName("Hands"), render_hand_leap_local);
+            }
+            else
+            {
+                app_.m_logger->error("Failed to get AvatarMemoryObject of leap motion.");
+            }
         }
-	}
-	else if (props_.get("subsystem.handmocap", false))
-	{
-		auto amo = crsf::TDynamicStageMemory::GetInstance()->GetAvatarMemoryObjectByName("MoCAPHands");
-		crsf::TPhysicsManager::GetInstance()->AddTask([this, amo](void) {
-			render_hand_mocap(amo);
-			return false;
-		}, "render_hand_mocap");
-	}
-	else if (props_.get("subsystem.unistmocap", false))
-	{
-		auto amo = crsf::TDynamicStageMemory::GetInstance()->GetAvatarMemoryObjectByName("KinestheticMoCAPHands");
-		crsf::TPhysicsManager::GetInstance()->AddTask([this, amo](void) {
-			render_unist_mocap(amo);
-			return false;
-		}, "render_unist_mocap");
-	}
+        else if (app_.m_property.get("subsystem.handmocap", false))
+        {
+            if (app_.dsm_->HasMemoryObject<crsf::TAvatarMemoryObject>("MoCAPHands"))
+            {
+                hand->set_render_method(app_.dsm_->GetAvatarMemoryObjectByName("MoCAPHands"), [this](Hand* hand, crsf::TAvatarMemoryObject* amo) { render_hand_mocap(hand, amo); });
+            }
+            else
+            {
+                app_.m_logger->error("Failed to get AvatarMemoryObject of Hand MoCAP.");
+            }
+        }
+        else if (app_.m_property.get("subsystem.unistmocap", false))
+        {
+            auto amo = crsf::TDynamicStageMemory::GetInstance()->GetAvatarMemoryObjectByName("KinestheticMoCAPHands");
+            crsf::TPhysicsManager::GetInstance()->AddTask([this, amo](void) {
+                render_unist_mocap(amo);
+                return false;
+            }, "render_unist_mocap");
+        }
+    }
+
+    configure_hand(hand);
+}
+
+void HandManager::configure_hand(Hand* hand)
+{
+    auto crhand = hand->get_hand();
+    crhand->SetPhysicsInteractor_KinematicObject();
+    crhand->SetPhysicsInteractor_Mass(0.0f);
 }

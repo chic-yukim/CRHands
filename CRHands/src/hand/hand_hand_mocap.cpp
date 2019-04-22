@@ -6,30 +6,20 @@
 
 #include "hand_manager.hpp"
 
-#include <render_pipeline/rppanda/showbase/showbase.hpp>
-#include <render_pipeline/rpcore/globals.hpp>
-
 #include <crsf/CoexistenceInterface/TDynamicStageMemory.h>
-
-#include <crsf/RenderingEngine/TGraphicRenderEngine.h>
+#include <crsf/CoexistenceInterface/TAvatarMemoryObject.h>
+#include <crsf/CoexistenceInterface/TPointMemoryObject.h>
 #include <crsf/CRModel/TWorld.h>
 #include <crsf/CRModel/TWorldObject.h>
 #include <crsf/CRModel/TCharacter.h>
-
 #include <crsf/CRModel/TCRHand.h>
-
-#include <crsf/CoexistenceInterface/TAvatarMemoryObject.h>
+#include <crsf/RenderingEngine/TGraphicRenderEngine.h>
 #include <crsf/System/TPose.h>
 
-#include <openvr_module.h>
+#include "hand/hand.hpp"
+#include "main.hpp"
 
-#if _MSC_VER > 1900
-#include <rpplugins/openvr/plugin.hpp>
-#else
-#include <openvr_plugin.hpp>
-#endif
-
-void HandManager::render_hand_mocap_local(crsf::TCRHand* hand, crsf::TAvatarMemoryObject* amo, int hand_side)
+void HandManager::render_hand_mocap_side(crsf::TCRHand* hand, crsf::TAvatarMemoryObject* amo, HandIndex hand_side)
 {
     auto world = crsf::TGraphicRenderEngine::GetInstance()->GetWorld();
 
@@ -41,7 +31,7 @@ void HandManager::render_hand_mocap_local(crsf::TCRHand* hand, crsf::TAvatarMemo
             const int model_index = 1 + (hand_side * 22) + (f * 4) + j;
 
             // Get TPose from avatar memory object
-            const auto& getTPose = amo->GetAvatarMemory().at(index);
+            const auto& getTPose = amo->GetAvatarMemory(index);
 
             // <<Rotation>>
             // Get quaternion from sensor
@@ -184,9 +174,9 @@ void HandManager::render_hand_mocap_local(crsf::TCRHand* hand, crsf::TAvatarMemo
 
             // width
             {
-                LVecBase3 middle_1 = hand->GetJointData(31)->GetPosition();
-                LVecBase3 thumb_1 = hand->GetJointData(23)->GetPosition();
-                float dist = dist_two_vector(middle_1, thumb_1);
+                const LVecBase3& middle_1 = hand->GetJointData(31)->GetPosition();
+                const LVecBase3& thumb_1 = hand->GetJointData(23)->GetPosition();
+                float dist = (middle_1 - thumb_1).length();
                 hand->GetJointData(i)->SetSensorWidth(dist);
             }
 
@@ -310,80 +300,118 @@ void HandManager::render_hand_mocap_local(crsf::TCRHand* hand, crsf::TAvatarMemo
     }
 }
 
-void HandManager::render_hand_mocap(crsf::TAvatarMemoryObject* amo)
+void HandManager::render_hand_mocap(Hand* hand, crsf::TAvatarMemoryObject* amo)
 {
-	crsf::TWorld* virtual_world = crsf::TGraphicRenderEngine::GetInstance()->GetWorld();
-
-    int tracker_index[HAND_INDEX_COUNT];
-
-    tracker_index[HAND_INDEX_LEFT] = tracker_indices_[HAND_INDEX_LEFT];
-    tracker_index[HAND_INDEX_RIGHT] = tracker_indices_[HAND_INDEX_RIGHT];
-
-    if (module_open_vr_)
-    {
-        if ((hand_mocap_mode_ & HAND_MOCAP_MODE_LEFT) == 0)
-        {
-            hand_->GetJointData(21)->Get3DModel()->SetPosition(LVecBase3(100), virtual_world);
-            hand_->GetJointData(21)->SetPosition(LVecBase3(100));
-        }
-        else
-        {
-            auto trakcer_pos = module_open_vr_->GetDevicePosition(tracker_index[HAND_INDEX_LEFT]);
-            auto tracker_quat = module_open_vr_->GetDeviceOrientation(tracker_index[HAND_INDEX_LEFT]);
-
-            LQuaternionf a, b, ba;
-            a.set_from_axis_angle(90, LVecBase3(0, 0, 1));
-            b.set_from_axis_angle(90, LVecBase3(0, 1, 0));
-            ba = b * a;
-            tracker_quat = ba * tracker_quat;
-
-            hand_->GetJointData(21)->Get3DModel()->SetPosition(trakcer_pos, virtual_world);
-            hand_->GetJointData(21)->SetPosition(trakcer_pos);
-            hand_->GetJointData(21)->Get3DModel()->SetHPR(tracker_quat.get_hpr(), virtual_world);
-            LQuaternionf c, d, dc;
-            c.set_from_axis_angle(90, LVecBase3(0, 0, 1));
-            d.set_from_axis_angle(90, LVecBase3(1, 0, 0));
-            dc = d * c;
-            tracker_quat = dc * tracker_quat;
-            hand_->GetJointData(21)->SetOrientation(tracker_quat);
-        }
-
-        if ((hand_mocap_mode_ & HAND_MOCAP_MODE_RIGHT) == 0)
-        {
-            hand_->GetJointData(43)->Get3DModel()->SetPosition(LVecBase3(100), virtual_world);
-            hand_->GetJointData(43)->SetPosition(LVecBase3(100));
-        }
-        else
-        {
-            auto trakcer_pos = module_open_vr_->GetDevicePosition(tracker_index[HAND_INDEX_RIGHT]);
-            auto tracker_quat = module_open_vr_->GetDeviceOrientation(tracker_index[HAND_INDEX_RIGHT]);
-
-            LQuaternionf a, b, c, cba;
-            a.set_from_axis_angle(90, LVecBase3(0, 0, 1));
-            b.set_from_axis_angle(180, LVecBase3(1, 0, 0));
-            c.set_from_axis_angle(-90, LVecBase3(0, 1, 0));
-            cba = c * b * a;
-            tracker_quat = cba * tracker_quat;
-
-            hand_->GetJointData(43)->Get3DModel()->SetPosition(trakcer_pos, virtual_world);
-            hand_->GetJointData(43)->SetPosition(trakcer_pos);
-            hand_->GetJointData(43)->Get3DModel()->SetHPR(tracker_quat.get_hpr(), virtual_world);
-            LQuaternionf d, e, ed;
-            d.set_from_axis_angle(-90, LVecBase3(0, 0, 1));
-            e.set_from_axis_angle(-90, LVecBase3(1, 0, 0));
-            ed = e * d;
-            tracker_quat = ed * tracker_quat;
-            hand_->GetJointData(43)->SetOrientation(tracker_quat);
-        }
-    }
+    if (!hand)
+        return;
 
     // if calibration process is finished,
-    if (is_hand_mocap_calibration_)
-    {
-        if ((hand_mocap_mode_ & HAND_MOCAP_MODE_LEFT) != 0)
-            render_hand_mocap_local(hand_, amo, 0);
+    if (!is_hand_mocap_calibration_)
+        return;
 
-        if ((hand_mocap_mode_ & HAND_MOCAP_MODE_RIGHT) != 0)
-            render_hand_mocap_local(hand_, amo, 1);
+    auto crhand = hand->get_hand();
+
+    auto world = crsf::TGraphicRenderEngine::GetInstance()->GetWorld();
+
+    if ((hand_mocap_mode_ & HAND_MOCAP_MODE_LEFT) != 0)
+        render_hand_mocap_side(crhand, amo, HAND_INDEX_LEFT);
+
+    if ((hand_mocap_mode_ & HAND_MOCAP_MODE_RIGHT) != 0)
+        render_hand_mocap_side(crhand, amo, HAND_INDEX_RIGHT);
+
+    render_hand_mocap_tracker(crhand);
+
+    auto dest_amo = hand->get_avatar_memory_object();
+    if (dest_amo)
+    {
+        auto dest_poses = dest_amo->GetAvatarMemory();
+
+        const unsigned int joint_number = crhand->GetJointNumber();
+
+        // Loop all joint
+        for (unsigned int i = 0; i < joint_number; i++)
+        {
+            crsf::TWorldObject* joint_model = crhand->GetJointData(i)->Get3DModel();
+            if (joint_model)
+                dest_poses[i].MakePosQuat(joint_model->GetPosition(world), joint_model->GetQuaternion(world));
+        }
+
+        dest_amo->SetAvatarMemory(dest_poses);
+        dest_amo->UpdateAvatarMemoryObject();
+    }
+}
+
+void HandManager::render_hand_mocap_tracker(crsf::TCRHand* crhand)
+{
+    if (!crhand)
+        return;
+
+    if (!app_.dsm_->HasMemoryObject<crsf::TPointMemoryObject>("OpenVRPoint"))
+        return;
+
+    auto pmo = app_.dsm_->GetPointMemoryObjectByName("OpenVRPoint");
+    const auto& points = pmo->GetPointMemory();
+
+    auto world = crsf::TGraphicRenderEngine::GetInstance()->GetWorld();
+
+    // left
+    auto hand_21 = crhand->GetJointData(21);
+    if (tracker_indices_[HAND_INDEX_LEFT] == -1)
+    {
+        hand_21->Get3DModel()->SetPosition(LVecBase3(100), world);
+        hand_21->SetPosition(LVecBase3(100));
+    }
+    else
+    {
+        auto tracker_pos = points[tracker_indices_[HAND_INDEX_LEFT]].m_Pose.GetPosition();
+        auto tracker_quat = points[tracker_indices_[HAND_INDEX_LEFT]].m_Pose.GetQuaternion();
+
+        LQuaternionf a, b, ba;
+        a.set_from_axis_angle(90, LVecBase3(0, 0, 1));
+        b.set_from_axis_angle(90, LVecBase3(0, 1, 0));
+        ba = b * a;
+        tracker_quat = ba * tracker_quat;
+
+        hand_21->Get3DModel()->SetPosition(tracker_pos, world);
+        hand_21->SetPosition(tracker_pos);
+        hand_21->Get3DModel()->SetHPR(tracker_quat.get_hpr(), world);
+
+        LQuaternionf c, d, dc;
+        c.set_from_axis_angle(90, LVecBase3(0, 0, 1));
+        d.set_from_axis_angle(90, LVecBase3(1, 0, 0));
+        dc = d * c;
+        tracker_quat = dc * tracker_quat;
+        hand_21->SetOrientation(tracker_quat);
+    }
+
+    // right
+    auto hand_43 = crhand->GetJointData(43);
+    if (tracker_indices_[HAND_INDEX_RIGHT] == -1)
+    {
+        hand_43->Get3DModel()->SetPosition(LVecBase3(100), world);
+        hand_43->SetPosition(LVecBase3(100));
+    }
+    else
+    {
+        auto tracker_pos = points[tracker_indices_[HAND_INDEX_RIGHT]].m_Pose.GetPosition();
+        auto tracker_quat = points[tracker_indices_[HAND_INDEX_RIGHT]].m_Pose.GetQuaternion();
+
+        LQuaternionf a, b, c, cba;
+        a.set_from_axis_angle(90, LVecBase3(0, 0, 1));
+        b.set_from_axis_angle(180, LVecBase3(1, 0, 0));
+        c.set_from_axis_angle(-90, LVecBase3(0, 1, 0));
+        cba = c * b * a;
+        tracker_quat = cba * tracker_quat;
+
+        hand_43->Get3DModel()->SetPosition(tracker_pos, world);
+        hand_43->SetPosition(tracker_pos);
+        hand_43->Get3DModel()->SetHPR(tracker_quat.get_hpr(), world);
+
+        LQuaternionf d, e, ed;
+        d.set_from_axis_angle(-90, LVecBase3(0, 0, 1));
+        e.set_from_axis_angle(-90, LVecBase3(1, 0, 0));
+        ed = e * d;
+        tracker_quat = ed * tracker_quat;
+        hand_43->SetOrientation(tracker_quat);
     }
 }

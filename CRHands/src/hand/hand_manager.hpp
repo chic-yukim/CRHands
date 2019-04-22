@@ -25,6 +25,8 @@ namespace crsf {
 }
 
 class MainApp;
+class User;
+class Hand;
 
 class OpenVRModule;
 class Hand_MoCAPInterface;
@@ -57,11 +59,13 @@ public:
     crsf::TWorldObject* get_hand_object() const;
     crsf::TCharacter* get_hand_character() const;
 
-	void setup_hand(void);
-	void setup_hand_event(void);
+    void setup_hand(User* user);
+    void setup_hand(void);
+    void setup_hand_event(void);
+    void configure_hand(Hand* hand);
 
 	// CHIC mocap
-	void render_hand_mocap(crsf::TAvatarMemoryObject *amo);
+	void render_hand_mocap(Hand* hand, crsf::TAvatarMemoryObject *amo);
 
 	// UNIST mocap
 	void render_unist_mocap(crsf::TAvatarMemoryObject *amo);
@@ -80,7 +84,8 @@ public:
 	bool grouped_object_update_event(const std::shared_ptr<crsf::TCRModel>& my_model);
 
 private:
-    void render_hand_mocap_local(crsf::TCRHand* hand, crsf::TAvatarMemoryObject* amo, int hand_side);
+    void render_hand_mocap_side(crsf::TCRHand* hand, crsf::TAvatarMemoryObject* amo, HandIndex hand_side);
+    void render_hand_mocap_tracker(crsf::TCRHand* hand);
 
 	MainApp& app_;
 
@@ -95,8 +100,6 @@ private:
 
 	// CHIC mocap
 	Hand_MoCAPInterface* interface_hand_mocap_ = nullptr;
-
-	float hand_model_joint_offset_[2][5][4];
 
 	bool is_hand_mocap_calibration_ = false;
 
@@ -114,8 +117,6 @@ private:
 
 	// VIVE
 	std::shared_ptr<OpenVRModule> module_open_vr_ = nullptr;
-
-	std::shared_ptr<crsf::TWorldObject> node_hmd_ = nullptr;
 
 	std::string left_wrist_tracker_serial_;
 	std::string right_wrist_tracker_serial_;

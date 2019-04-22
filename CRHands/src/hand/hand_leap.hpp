@@ -11,4 +11,3 @@ class TAvatarMemoryObject;
 class Hand;
 
 void render_hand_leap_local(Hand* hand, crsf::TAvatarMemoryObject* amo);
-void render_hand_leap_remote(Hand* hand, crsf::TAvatarMemoryObject* amo);

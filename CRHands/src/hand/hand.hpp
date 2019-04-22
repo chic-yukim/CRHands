@@ -72,3 +72,7 @@ inline crsf::TAvatarMemoryObject* Hand::get_avatar_memory_object() const
 {
     return hand_amo_;
 }
+
+// ************************************************************************************************
+
+void render_hand(Hand* hand, crsf::TAvatarMemoryObject* amo);

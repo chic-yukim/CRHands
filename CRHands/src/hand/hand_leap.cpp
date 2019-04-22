@@ -29,10 +29,10 @@ enum LeapMotionMode
     LEAP_MOTION_MODE_HMD
 };
 
-static const double M_PI = std::acos(-1);
-
 void render_hand_leap_local(Hand* hand, crsf::TAvatarMemoryObject* amo)
 {
+    static const double M_PI = std::acos(-1);
+
     if (!hand)
         return;
 
@@ -73,16 +73,11 @@ void render_hand_leap_local(Hand* hand, crsf::TAvatarMemoryObject* amo)
         hand->get_object()->SetMatrix(origin_to_leap_mat);
     }
 
-    std::vector<crsf::TAvatarHeader> dest_headers;
     std::vector<crsf::TPose> dest_poses;
     auto dest_amo = hand->get_avatar_memory_object();
     if (dest_amo)
     {
-        dest_headers = dest_amo->GetAvatarHeader();
         dest_poses = dest_amo->GetAvatarMemory();
-
-        for (auto&& header: dest_headers)
-            header.m_bUpdate = false;
     }
 
     // # joint
@@ -303,11 +298,7 @@ void render_hand_leap_local(Hand* hand, crsf::TAvatarMemoryObject* amo)
 
             if (dest_amo)
             {
-                dest_headers[i].m_bUpdate = true;
-
-                // set my hand motion amo for sending to server - position
                 dest_poses[i].MakePosition(joint_model->GetPosition(world));
-                // set my hand motion amo for sending to server - rotation
                 dest_poses[i].SetQuaternion(joint_model->GetQuaternion(world));
             }
         }
@@ -315,78 +306,7 @@ void render_hand_leap_local(Hand* hand, crsf::TAvatarMemoryObject* amo)
 
     if (dest_amo)
     {
-        // set my hand motion amo for sending to server - full data
         dest_amo->SetAvatarMemory(dest_poses);
-        // update my hand motion amo
         dest_amo->UpdateAvatarMemoryObject();
-    }
-}
-
-void render_hand_leap_remote(Hand* hand, crsf::TAvatarMemoryObject* amo)
-{
-    if (!hand)
-        return;
-
-    auto crhand = hand->get_hand();
-
-    if (!(crhand->GetHandProperty().m_bRender3DModel && crhand->GetHandProperty().m_p3DModel))
-        return;
-
-    auto world = crsf::TGraphicRenderEngine::GetInstance()->GetWorld();
-
-    // # joint
-    unsigned int joint_number = crhand->GetJointNumber();
-
-    // loop all joint
-    for (unsigned int i = 0; i < joint_number; i++)
-    {
-        // read joint TPose from AvatarMemory
-        const auto& get_avatar_pose = amo->GetAvatarMemory(i);
-        // read joint TAvatarHeader from AvatarMemory
-        const auto& get_avatar_header = amo->GetAvatarHeader(i);
-
-        // read joint position
-        LVecBase3 joint_position = get_avatar_pose.GetPosition();
-        // read joint quaternion
-        LQuaternionf joint_quaternion = get_avatar_pose.GetQuaternion();
-
-        // update 3D model's pose
-        crsf::TWorldObject* joint_model = crhand->GetJointData(i)->Get3DModel();
-        if (joint_model)
-        {
-            // left
-            if (i >= 1 && i <= 20)
-            {
-                // set hpr
-                LVecBase3 hpr = joint_quaternion.get_hpr();
-                joint_model->SetHPR(hpr, world);
-            }
-            else if (i == 21) // root(wrist)
-            {
-                // set position
-                joint_model->SetPosition(joint_position, world);
-
-                // set hpr
-                LVecBase3 hpr = joint_quaternion.get_hpr();
-                joint_model->SetHPR(hpr, world);
-            }
-
-            // right
-            if (i >= 23 && i <= 42)
-            {
-                // set hpr
-                LVecBase3 hpr = joint_quaternion.get_hpr();
-                joint_model->SetHPR(hpr, world);
-            }
-            else if (i == 43) // root(wrist)
-            {
-                // set position
-                joint_model->SetPosition(joint_position, world);
-
-                // set hpr
-                LVecBase3 hpr = joint_quaternion.get_hpr();
-                joint_model->SetHPR(hpr, world);
-            }
-        }
     }
 }

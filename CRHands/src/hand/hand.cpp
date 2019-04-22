@@ -5,8 +5,10 @@
 #include <crsf/CRModel/TCRHand.h>
 #include <crsf/CRModel/THandPhysicsInteractor.h>
 #include <crsf/CRModel/TCRModel.h>
+#include <crsf/CRModel/TWorld.h>
 #include <crsf/System/TCRProperty.h>
 #include <crsf/CREngine/THandInteractionEngineConnector.h>
+#include <crsf/RenderingEngine/TGraphicRenderEngine.h>
 
 Hand::Hand(const crsf::TCRProperty& props, crsf::TWorldObject* hand_model) : hand_object_(hand_model)
 {
@@ -69,4 +71,54 @@ void Hand::set_render_method(crsf::TAvatarMemoryObject* source_amo, const Render
     hand_connector_->ConnectHand([this](crsf::TAvatarMemoryObject* amo) {
         render_method_(this, amo);
     }, source_amo);
+}
+
+// ************************************************************************************************
+
+void render_hand(Hand* hand, crsf::TAvatarMemoryObject* amo)
+{
+    if (!hand)
+        return;
+
+    auto crhand = hand->get_hand();
+
+    if (!(crhand->GetHandProperty().m_bRender3DModel && crhand->GetHandProperty().m_p3DModel))
+        return;
+
+    auto world = crsf::TGraphicRenderEngine::GetInstance()->GetWorld();
+
+    // # joint
+    const unsigned int joint_number = crhand->GetJointNumber();
+
+    // loop left joint
+    const auto left_joint_number = (std::min)(joint_number, 22u);
+    for (unsigned int i = 1; i < left_joint_number; ++i)
+    {
+        // update 3D model's pose
+        crsf::TWorldObject* joint_model = crhand->GetJointData(i)->Get3DModel();
+        if (joint_model)
+        {
+            const auto& get_avatar_pose = amo->GetAvatarMemory(i);
+
+            joint_model->SetHPR(get_avatar_pose.GetQuaternion().get_hpr(), world);
+            if (i == 21) // root(wrist)
+                joint_model->SetPosition(get_avatar_pose.GetPosition(), world);
+        }
+    }
+
+    // loop right joint
+    const auto right_joint_number = (std::min)(joint_number, 44u);
+    for (unsigned int i = 23; i < right_joint_number; ++i)
+    {
+        // update 3D model's pose
+        crsf::TWorldObject* joint_model = crhand->GetJointData(i)->Get3DModel();
+        if (joint_model)
+        {
+            const auto& get_avatar_pose = amo->GetAvatarMemory(i);
+
+            joint_model->SetHPR(get_avatar_pose.GetQuaternion().get_hpr(), world);
+            if (i == 43) // root(wrist)
+                joint_model->SetPosition(get_avatar_pose.GetPosition(), world);
+        }
+    }
 }
