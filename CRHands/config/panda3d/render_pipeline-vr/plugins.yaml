@@ -33,6 +33,8 @@ enabled:
     - sky_ao
     - openvr
     - env_probes
+    - imgui
+    - rpstat
 
 overrides:
     ao:
