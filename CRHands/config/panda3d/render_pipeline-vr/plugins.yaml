@@ -214,3 +214,4 @@ overrides:
         supersample_mode: force
         supersample_scale: 1.0
         load_render_model: false
+        update_camera_pose: true

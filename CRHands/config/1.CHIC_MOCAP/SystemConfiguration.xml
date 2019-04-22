@@ -7,30 +7,18 @@
     <systemindex>1</systemindex>
 
     <dynamic_modules>
-		<module>
-			<id>crprofiler</id>
-		</module>
-		
-		<!--
-		<module>
-            <id>leapmotion</id>
+        <module>
+            <id>crprofiler</id>
         </module>
-		-->
-		
-		<!--
-		<module>
-            <id>kinesthetic_hand_mocap</id>
-        </module>
-		-->
-		
-		<module>
+
+        <module>
             <id>hand_mocap</id>	
         </module>
-		
-		<module>
+
+        <module>
             <id>openvr</id>
         </module>
-		
+
         <application>
             <id>CRHands</id>
         </application>
