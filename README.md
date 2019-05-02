@@ -39,41 +39,14 @@
 
 
 ### 립모션
-- `DynamicModuleConfiguration.xml` 파일을 실험하는 기기에 맞게 수정
-  - `leapmotion.interface` 태그
-    - service_type: `interploation` (기본값), `callback`
-    - mode: `HMD` (기본값), `floor`
+- https://github.com/chic-yukim/crsf/wiki/CRSF-Modules:-leapmotion 페이지 참조
+- `DynamicModuleConfiguration.xml`
   - `subsystem.leap` 태그 값을 true 로 변경
-- `DeviceConfiguration.xml` 파일 설정
-  ```xml
-  <motion>
-      <inputinterface>LeapMotion</inputinterface>
-      <outputinterface>Hands</outputinterface>
-      <fps>90</fps>
-      <joint>44</joint>
-  </motion>
-  ```
 
 ### CHIC 핸드모캡 설정
-- `DynamicModuleConfiguration.xml` 파일을 실험하는 기기에 맞게 수정
-  - `hand_mocap.interface` 태그
-    - commode: `ble` (기본값), `serial`
-    - mode: `left`, `right` 또는 `both`
-    - port: `commode` 가 `serial` 일 경우에만 작동하며, `COM1` 과 같이 COM 포트 이름을 추가
-
-      ![com-port-image](https://user-images.githubusercontent.com/937305/56501079-71a1f180-6548-11e9-9823-f7dba82b714d.png)
-
-    - mech: Hand MoCAP 장비 번호
+- https://github.com/chic-yukim/crsf/wiki/CRSF-Modules:-hand_mocap 페이지 참조
+- `DynamicModuleConfiguration.xml`
   - `subsystem.handmocap` 태그 값을 true 로 변경
-- `DeviceConfiguration.xml` 파일 설정
-  ```xml
-  <motion>
-      <inputinterface>Hand_MoCAP</inputinterface>
-      <outputinterface>MoCAPHands</outputinterface>
-      <fps>90</fps>
-      <joint>24</joint>
-  </motion>
-  ```
 
 ### UNIST 모캡
 - `DynamicModuleConfiguration.xml` 파일을 실험하는 기기에 맞게 수정
@@ -81,7 +54,7 @@
     - port: `COM1` 과 같이 COM 포트 이름을 추가
 
       ![com-port-image](https://user-images.githubusercontent.com/937305/56501079-71a1f180-6548-11e9-9823-f7dba82b714d.png)
-      
+
     - version: `new` (기본값), `old`
   - `subsystem.unistmocap` 태그 값을 true 로 변경
 - `DeviceConfiguration.xml` 파일 설정
