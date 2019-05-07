@@ -41,12 +41,12 @@
 ### 립모션
 - https://github.com/chic-yukim/crsf/wiki/CRSF-Modules:-leapmotion 페이지 참조
 - `DynamicModuleConfiguration.xml`
-  - `subsystem.leap` 태그 값을 true 로 변경
+  - `subsystem.leap` 태그 값을 true 로 변경 (`handmocap`, `unistmocap` 은 fasle 로 변경)
 
 ### CHIC 핸드모캡 설정
 - https://github.com/chic-yukim/crsf/wiki/CRSF-Modules:-hand_mocap 페이지 참조
 - `DynamicModuleConfiguration.xml`
-  - `subsystem.handmocap` 태그 값을 true 로 변경
+  - `subsystem.handmocap` 태그 값을 true 로 변경 (`leap`, `unistmocap` 은 fasle 로 변경)
 
 ### UNIST 모캡
 - `DynamicModuleConfiguration.xml` 파일을 실험하는 기기에 맞게 수정
@@ -56,7 +56,7 @@
       ![com-port-image](https://user-images.githubusercontent.com/937305/56501079-71a1f180-6548-11e9-9823-f7dba82b714d.png)
 
     - version: `new` (기본값), `old`
-  - `subsystem.unistmocap` 태그 값을 true 로 변경
+  - `subsystem.unistmocap` 태그 값을 true 로 변경 (`leap`, `handmocap` 은 fasle 로 변경)
 - `DeviceConfiguration.xml` 파일 설정
   ```xml
   <motion>
