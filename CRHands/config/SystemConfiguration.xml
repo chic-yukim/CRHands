@@ -11,26 +11,26 @@
 			<id>crprofiler</id>
 		</module>
 
-		<module>
-            <id>leapmotion</id>
-        </module>
+		<!-- <module> -->
+            <!-- <id>leapmotion</id> -->
+        <!-- </module> -->
 
 		
 		<!--
 		<module>
             <id>kinesthetic_hand_mocap</id>
         </module>
-		
+		-->
 		<module>
             <id>hand_mocap</id>	
         </module>
-		-->
 		
-		<!--
+		
+		
 		<module>
             <id>openvr</id>
         </module>
-		-->
+		
 		
         <application>
             <id>CRHands</id>
